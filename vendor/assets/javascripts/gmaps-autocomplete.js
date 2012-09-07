@@ -213,13 +213,19 @@ var GmapsAutoComplete = {
   autoCompleteInit: function (opts) {
     opts = opts || {};
     this.region = opts['region'] || 'DK';
+    // console.log('inputField', this.inputField);
+
+    var self = this;
 
     $(this.inputField).autocomplete({
       // source is the list of input options shown in the autocomplete dropdown.
       // see documentation: http://jqueryui.com/demos/autocomplete/
-      source: this.autoCompleteSource,
+      source: self.autoCompleteSource,
       // event triggered when drop-down option selected
-      select: this.autoCompleteSelect
+      select: function(event,ui){
+        self.updateUI(  ui.item.value, ui.item.geocode.geometry.location )
+        self.updateMap( ui.item.geocode.geometry )
+      }
     });
 
     // triggered when user presses a key in the address box
@@ -236,12 +242,6 @@ var GmapsAutoComplete = {
       // re-enable if previously disabled above
       $(this.inputField).autocomplete("enable")
     }
-  },
-
-  // self grants access to caller scope
-  autoCompleteSelect: function(event,ui){
-      self.updateUI(  ui.item.value, ui.item.geocode.geometry.location )
-      self.updateMap( ui.item.geocode.geometry )
   },
 
   // self grants access to caller scope
