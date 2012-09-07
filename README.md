@@ -23,37 +23,108 @@ Packed and ready for the Asset pipeline :)
 
 ```javascript
 $(document).ready(function() { 
-  GmapsAutoComplete.gmaps_init();
-  GmapsAutoComplete.autocomplete_init();
+  GmapsAutoComplete.init();
+  GmapsAutoComplete.autoCompleteInit();
 });
 ```
 
 ## Configuration options
 
-`gmaps_init()` take an option hash, using the following defaults:
+`init()` take an option hash, using the following defaults:
 
 ```javascript
-  defaultOptions = {
-    mapElem: "#gmaps-canvas", 
-    zoomLevel: 2, 
-    mapType: google.maps.MapTypeId.ROADMAP,
-    pos: [51.751724, -1.255284],
-    inputField: '#gmaps-input-address',
-    errorField: '#gmaps-error',
-    positionOutputter: this.defaultPositionOutputter
-  };
+defaultOptions = {
+  mapElem: "#gmaps-canvas", 
+  zoomLevel: 2, 
+  mapType: google.maps.MapTypeId.ROADMAP,
+  pos: [51.751724, -1.255284],
+  inputField: '#gmaps-input-address',
+  errorField: '#gmaps-error',
+  positionOutputter: this.defaultPositionOutputter,
+  updateUI : this.defaultUpdateUI,
+  updateMap : this.defaultUpdateMap
+};
 ```
 
-`autocomplete_init` also takes an option hash, but currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) is used.
+`autoCompleteInit` also takes an option hash, but currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) is used.
 
 ```javascript
-autocomplete_init({region: 'ES'});
+autoCompleteInit({region: 'USA'});
+```
+
+# Examples
+
+See `spec/index.html` for an example page using this "plugin". Note that if you set `mapElem`to null or leave out that element on the page, the autocomplete will function without attempting to update the map :)
+
+## Customization
+
+Some of the prime candidate functions for customization are:
+
+* updateUi
+* updateMap
+
+Here the default simple `updateUI` implementation:
+
+```javascript
+updateUi: function( address, latLng ) {
+  $(this.inputField).autocomplete("close");
+  $(this.inputField).val(address);
+
+  this.positionOutputter(latLng);
+}
+```
+
+Let's enrich the autocomplete fields with a jobs count for "the area" for each address.
+
+```javascript
+updateUi: function( address, latLng ) {
+  $(this.inputField).autocomplete("close");
+
+  var jobsCount = $.ajax(url: 'jobs/search?address=' + address + '&type=count');
+
+  $(this.inputField).val(address + ' (' + jobsCount + ' jobs)');
+}
+```
+
+## Customize messages
+
+For now, directly define your own implementation (override) the following functions directly on GmapsAutoComplete
+
+* geocodeErrorMsg: function()
+* invalidAddressMsg: function(value)
+* noAddressFoundMsg: function()
+
+Example:
+
+```javascript
+
+GmapsAutoComplete.geocodeErrorMsg = function() {
+  "Geocode error!"
+}
+```
+
+## Formtastic example
+
+For [formtastic](https://github.com/justinfrench/formtastic) something like:
+
+```ruby
+= semantic_form_for @search do |f|
+  = f.input :address, placeholder: 'find address'
+  %span#address_error
+
+```javascript
+$(document).ready(function() { 
+  GmapsAutoComplete.init({inputField: 'form#search #address', errorField: 'form#search #address_error'});
+  GmapsAutoComplete.autoCompleteInit({region: 'DK'});
+});
 ```
 
 ## TODO
 
 * better Javascript encapsulation
-* translation to Coffeescript and use Coffee classes :)
+* translation to Coffeescript using Coffee classes :)
+
+Please help out with suggestions and improvements etc!
 
 ## Contributing to gmaps-autocomplete-rails
  
