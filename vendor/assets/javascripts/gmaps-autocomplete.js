@@ -8,6 +8,8 @@ var GmapsAutoComplete = {
   updateUI: null,
   updateMap: null,
   region: null,
+  country: null,
+  debugOn: false,
 
   // initialise the google maps objects, and add listeners
   mapElem: document.getElementById("gmaps-canvas"), 
@@ -18,22 +20,20 @@ var GmapsAutoComplete = {
   errorField: '#gmaps-error',
   positionOutputter: this.defaultPositionOutputter,
 
+  defaultOptions: {
+    mapElem: "#gmaps-canvas", 
+    zoomLevel: 2, 
+    mapType: google.maps.MapTypeId.ROADMAP,
+    pos: [51.751724, -1.255284],
+    inputField: '#gmaps-input-address',
+    errorField: '#gmaps-error',
+    debugOn: false
+  },
+
   init: function(opts){
     opts = opts || {};
-
-    defaultOptions = {
-      mapElem: "#gmaps-canvas", 
-      zoomLevel: 2, 
-      mapType: google.maps.MapTypeId.ROADMAP,
-      pos: [51.751724, -1.255284],
-      inputField: '#gmaps-input-address',
-      errorField: '#gmaps-error',
-      positionOutputter: this.defaultPositionOutputter,
-      updateUI : this.defaultUpdateUI,
-      updateMap : this.defaultUpdateMap
-    };
-
-    $.extend(opts, defaultOptions);
+    var callOpts = jQuery.extend(true, {}, opts);
+    var opts = $.extend(true, {}, this.defaultOptions, opts);
 
     var pos = opts['pos'];
     var lat = pos[0];
@@ -50,33 +50,43 @@ var GmapsAutoComplete = {
     
     this.inputField = opts['inputField'];
     this.errorField = opts['#gmaps-error'];
+    this.debugOn = opts['debugOn'];
 
-    this.positionOutputter = opts['positionOutputter'];
-    this.updateUI = opts['updateUI'];
-    this.updateMap = opts['updateMap'];
+    this.positionOutputter = opts['positionOutputter'] || this.defaultPositionOutputter;
+    this.updateUI = opts['updateUI'] || this.defaultUpdateUI;
+    this.updateMap = opts['updateMap'] || this.defaultUpdateMap;
+
+    this.debug('called with opts', callOpts); 
+    this.debug('defaultOptions', this.defaultOptions);
+    this.debug('options after merge with defaults', opts);
 
     // center of the universe
     var latlng = new google.maps.LatLng(lat, lng);
+    this.debug('lat,lng', latlng);
 
-    var options = {
+    var mapOptions = {
       zoom: zoomLevel,
       center: latlng,
       mapTypeId: mapType
     };
 
+    this.debug('map options', mapOptions);
+
     // the geocoder object allows us to do latlng lookup based on address
-    geocoder = new google.maps.Geocoder();
+    this.geocoder = new google.maps.Geocoder();
 
     var self = this;
 
     if (typeof(mapElem) == 'undefined') {
-      self.showError("Map element " + opts['mapElem'] + " could not be resolved!");
+      this.showError("Map element " + opts['mapElem'] + " could not be resolved!");
     }
+
+    self.debug('mapElem', this.mapElem);
 
     if (!mapElem) { return }
     
     // create our map object
-    this.map = new google.maps.Map(mapElem, options);
+    this.map = new google.maps.Map(mapElem, mapOptions);
 
     if (!this.map) { return }
 
@@ -87,6 +97,11 @@ var GmapsAutoComplete = {
     });
 
     self.addMapListeners(this.marker, this.map);
+  },
+
+  debug: function(label, obj) {
+    if (!this.debugOn) { return }
+    console.log(label, obj);
   },
 
   addMapListeners: function(marker, map) {
@@ -120,7 +135,13 @@ var GmapsAutoComplete = {
   // fill in the UI elements with new position data
   defaultUpdateUI: function( address, latLng ) {
     $(this.inputField).autocomplete("close");
-    $(this.inputField).val(address);
+
+    this.debug('country', this.country);
+    var updateAdr = address.replace(", " + this.country, '');
+    var updateAdr = address;
+    this.debug('updateAdr', updateAdr);
+
+    $(this.inputField).val(updateAdr);
 
     this.positionOutputter(latLng);
   },
@@ -144,12 +165,13 @@ var GmapsAutoComplete = {
 
     request = {};
     request[type] = value;
-    var self = this;
 
-    geocoder.geocode(request, performGeocode);
+    this.geocoder.geocode(request, performGeocode);
   },
 
   performGeocode: function(results, status) {
+    this.debug('performGeocode', status);
+
     $(self.errorField).html('');
     if (status == google.maps.GeocoderStatus.OK) {
       self.geocodeSuccess(results);
@@ -159,6 +181,7 @@ var GmapsAutoComplete = {
   },
 
   geocodeSuccess: function(results) {
+    this.debug('geocodeSuccess', results);
     // Google geocoding has succeeded!
     if (results[0]) {
       // Always update the UI elements with new location data
@@ -174,6 +197,7 @@ var GmapsAutoComplete = {
   },
 
   geocodeFailure: function(type, value) {
+    this.debug('geocodeFailure', type);
     // Google Geocoding has failed. Two common reasons:
     //   * Address not recognised (e.g. search for 'zxxzcxczxcx')
     //   * Location doesn't map to address (e.g. click in middle of Atlantic)
@@ -213,19 +237,49 @@ var GmapsAutoComplete = {
   autoCompleteInit: function (opts) {
     opts = opts || {};
     this.region = opts['region'] || 'DK';
-    // console.log('inputField', this.inputField);
+    this.country = opts['country'] || 'Denmark';
+    this.debug('region', this.region)
 
     var self = this;
 
     $(this.inputField).autocomplete({
-      // source is the list of input options shown in the autocomplete dropdown.
-      // see documentation: http://jqueryui.com/demos/autocomplete/
-      source: self.autoCompleteSource,
       // event triggered when drop-down option selected
       select: function(event,ui){
         self.updateUI(  ui.item.value, ui.item.geocode.geometry.location )
         self.updateMap( ui.item.geocode.geometry )
-      }
+      },
+
+      // source is the list of input options shown in the autocomplete dropdown.
+      // see documentation: http://jqueryui.com/demos/autocomplete/
+      source: function(request,response) {
+        // https://developers.google.com/maps/documentation/geocoding/#RegionCodes
+        var region_postfix = ''
+        var region = self.region;
+        
+        if (region) {
+          region_postfix = ', ' + region
+        }
+        var address = request.term + region_postfix;
+
+        self.debug('geocode address', address);
+        
+        var geocodeOpts = {'address': address }
+
+        // the geocode method takes an address or LatLng to search for
+        // and a callback function which should process the results into
+        // a format accepted by jqueryUI autocomplete
+        self.geocoder.geocode(geocodeOpts, function(results, status) {
+          response($.map(results, function(item) {
+            var uiAddress = item.formatted_address.replace(", " + self.country, '');
+            // var uiAddress = item.formatted_address;
+            return {
+              label: uiAddress, // appears in dropdown box
+              value: uiAddress, // inserted into input element when selected
+              geocode: item                  // all geocode data: used in select callback event
+            }
+          }));
+        })
+      } 
     });
 
     // triggered when user presses a key in the address box
@@ -242,31 +296,5 @@ var GmapsAutoComplete = {
       // re-enable if previously disabled above
       $(this.inputField).autocomplete("enable")
     }
-  },
-
-  // self grants access to caller scope
-  autoCompleteSource: function(request,response) {
-    // https://developers.google.com/maps/documentation/geocoding/#RegionCodes
-    var region_postfix = ''
-    var region = self.region;
-
-    if (region) {
-      region_postfix = ', ' + region
-    }
-
-    geocode_opts = {'address': request.term + region_postfix }
-
-    // the geocode method takes an address or LatLng to search for
-    // and a callback function which should process the results into
-    // a format accepted by jqueryUI autocomplete
-    geocoder.geocode(geocode_opts, function(results, status) {
-      response($.map(results, function(item) {
-        return {
-          label: item.formatted_address, // appears in dropdown box
-          value: item.formatted_address, // inserted into input element when selected
-          geocode: item                  // all geocode data: used in select callback event
-        }
-      }));
-    })
-  }  
+  } 
 }

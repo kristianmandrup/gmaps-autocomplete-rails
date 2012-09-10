@@ -40,17 +40,25 @@ defaultOptions = {
   pos: [51.751724, -1.255284],
   inputField: '#gmaps-input-address',
   errorField: '#gmaps-error',
-  positionOutputter: this.defaultPositionOutputter,
-  updateUI : this.defaultUpdateUI,
-  updateMap : this.defaultUpdateMap
+  debugOn: false
 };
 ```
 
-`autoCompleteInit` also takes an option hash, but currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) is used.
+The following default methods can be replaced by configuration:
 
 ```javascript
-autoCompleteInit({region: 'USA'});
+  positionOutputter: this.defaultPositionOutputter,
+  updateUI : this.defaultUpdateUI,
+  updateMap : this.defaultUpdateMap
 ```
+
+`autoCompleteInit` also takes an option hash, but currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) and country can be used.
+
+```javascript
+autoCompleteInit({region: 'DK', country: 'Denmark'});
+```
+
+Will make searches in the DK region and remove `', Denmark'` from the result.
 
 # Examples
 
