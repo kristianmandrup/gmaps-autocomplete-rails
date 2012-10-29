@@ -6,20 +6,21 @@ See it in action here: [rjshade.github.com/gmaps-autocomplete/](http://rjshade.g
 
 Some more explanation here: [rjshade.com/2012/03/30/Google-Maps-autocomplete-with-jQuery-UI](/[http://www.rjshade.com/2012/03/30/Google-Maps-autocomplete-with-jQuery-UI/)
 
-## Use with Rails form helpers
+## Install
 
-```ruby
-= simple_form_for(@post) do |f|
-    = f.input :address, :input_html =>{:id => 'gmaps-input-address'}, :placeholder => 'Start typing a place name...'
-```
+`gem 'gmaps-autocomplete-rails'
 
-Packed and ready for the Asset pipeline :)
+And run `bundle`;)
+
+Packed and ready for use with the Asset pipeline :)
+
+Add to javascript manifest file, fx `application.js`
 
 ```
 //= require gmaps-autocomplete
 ```
 
-## Usage
+## Initialize
 
 ```javascript
 $(document).ready(function() { 
@@ -28,9 +29,25 @@ $(document).ready(function() {
 });
 ```
 
-## Configuration options
+### Configuration options
 
-`init()` take an option hash, using the following defaults:
+`init()` can take an option hash, using the following defaults:
+
+```javascript
+defaultOptions = {
+  mapElem: "#gmaps-canvas", 
+  zoomLevel: 2, 
+  mapType: google.maps.MapTypeId.ROADMAP,
+  pos: [51.751724, -1.255284],
+  inputField: '#gmaps-input-address',
+  errorField: '#gmaps-error',
+  debugOn: false
+};
+```
+
+### Advanced Configuration
+
+`init()` can take an option hash, using the following defaults:
 
 ```javascript
 defaultOptions = {
@@ -60,11 +77,18 @@ autoCompleteInit({region: 'DK', country: 'Denmark'});
 
 Will make searches in the DK region and remove `', Denmark'` from the result.
 
-# Examples
+## Use with Rails form helpers
+
+```ruby
+= simple_form_for(@post) do |f|
+    = f.input :address, :input_html =>{:id => 'gmaps-input-address'}, :placeholder => 'Start typing a place...'
+```
+
+## Examples
 
 See `spec/index.html` for an example page using this "plugin". Note that if you set `mapElem`to null or leave out that element on the page, the autocomplete will function without attempting to update the map :)
 
-## Customization
+## Advanced Customization
 
 Some of the prime candidate functions for customization are:
 
@@ -94,7 +118,7 @@ updateUi: function( address, latLng ) {
 }
 ```
 
-## Customize messages
+## Customizing messages
 
 For now, directly define your own implementation (override) the following functions directly on GmapsAutoComplete
 
@@ -144,7 +168,7 @@ Please help out with suggestions and improvements etc!
 * Make sure to add tests for it. This is important so I don't break it in a future version unintentionally.
 * Please try not to mess with the Rakefile, version, or history. If you want to have your own version, or is otherwise necessary, that is fine, but please isolate to its own commit so I can cherry-pick around it.
 
-== Copyright
+## Copyright
 
 Copyright (c) 2012 Kristian Mandrup. See LICENSE.txt for
 further details.
