@@ -20,6 +20,17 @@ Add to javascript manifest file, fx `application.js`
 //= require gmaps-autocomplete
 ```
 
+And include the google maps script before `application.js`, fx in your layout file:
+
+See [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
+
+*application.html.erb*
+
+```erb
+<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<%= javascript_include_tag "application" %>
+```
+
 ## Initialize
 
 ```javascript
