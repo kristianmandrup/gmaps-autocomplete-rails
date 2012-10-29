@@ -31,6 +31,8 @@ See [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps
 <%= javascript_include_tag "application" %>
 ```
 
+Note also that the autocomplete script depends on jQuery 1.6+.
+
 ## Initialize
 
 ```javascript
@@ -154,6 +156,9 @@ For [formtastic](https://github.com/justinfrench/formtastic) something like:
 = semantic_form_for @search do |f|
   = f.input :address, placeholder: 'find address'
   %span#address_error
+```
+
+And matching configuration in your javascript:
 
 ```javascript
 $(document).ready(function() { 
@@ -161,6 +166,8 @@ $(document).ready(function() {
   GmapsAutoComplete.autoCompleteInit({region: 'DK'});
 });
 ```
+
+Enjoy!
 
 ## TODO
 
