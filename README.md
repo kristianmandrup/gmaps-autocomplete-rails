@@ -10,6 +10,10 @@ Some more explanation here: [https://github.com/rjshade/gmaps-autocomplete](http
 
 gem 'gmaps-autocomplete-rails'
 
+You will also need:
+* gem 'jquery-rails'
+* gem 'jquery-ui-rails'
+
 And run `bundle install`;)
 
 Packed and ready for use with the Asset pipeline :)
@@ -17,6 +21,8 @@ Packed and ready for use with the Asset pipeline :)
 Add to javascript manifest file, fx `application.js`
 
 ```
+//= require jquery_ujs
+//= require jquery.ui.all
 //= require gmaps-autocomplete
 ```
 
