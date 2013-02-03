@@ -2,21 +2,27 @@
 
 Extracted from [gmaps-autocomplete](https://github.com/rjshade/gmaps-autocomplete) and improved markedly and then packaged for use with Rails as an asset gem :)
 
-See it in action here: [rjshade.github.com/gmaps-autocomplete/](http://rjshade.github.com/gmaps-autocomplete/)
+See it in action here: [http://rjshade.com/projects/gmaps-autocomplete/](http://rjshade.com/projects/gmaps-autocomplete/)
 
-Some more explanation here: [rjshade.com/2012/03/30/Google-Maps-autocomplete-with-jQuery-UI](/[http://www.rjshade.com/2012/03/30/Google-Maps-autocomplete-with-jQuery-UI/)
+Some more explanation here: [https://github.com/rjshade/gmaps-autocomplete](https://github.com/rjshade/gmaps-autocomplete)
 
 ## Install
 
-`gem 'gmaps-autocomplete-rails'
+gem 'gmaps-autocomplete-rails'
 
-And run `bundle`;)
+You will also need:
+* gem 'jquery-rails'
+* gem 'jquery-ui-rails'
+
+And run `bundle install`;)
 
 Packed and ready for use with the Asset pipeline :)
 
 Add to javascript manifest file, fx `application.js`
 
 ```
+//= require jquery_ujs
+//= require jquery.ui.all
 //= require gmaps-autocomplete
 ```
 
@@ -35,11 +41,22 @@ Note also that the autocomplete script depends on jQuery 1.6+.
 
 ## Initialize
 
+*application.js*
+
 ```javascript
 $(document).ready(function() { 
   GmapsAutoComplete.init();
   GmapsAutoComplete.autoCompleteInit();
 });
+```
+or coffeescript
+
+*yourmodel.js.coffee*
+
+```
+$ ->
+  GmapsAutoComplete.init()
+  GmapsAutoComplete.autoCompleteInit()
 ```
 
 ### Configuration options
