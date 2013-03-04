@@ -72,7 +72,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rspec>, [">= 2.8.0"])
       s.add_dependency(%q<rdoc>, [">= 3.12"])
       s.add_dependency(%q<bundler>, [">= 1.0.0"])
-      s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+      s.add_dependency(%q<jeweler>, [">= 1.8.4"])
       s.add_dependency(%q<simplecov>, [">= 0.5"])
     end
   else
@@ -80,7 +80,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<rspec>, [">= 2.8.0"])
     s.add_dependency(%q<rdoc>, [">= 3.12"])
     s.add_dependency(%q<bundler>, [">= 1.0.0"])
-    s.add_dependency(%q<jeweler>, ["~> 1.8.4"])
+    s.add_dependency(%q<jeweler>, [">= 1.8.4"])
     s.add_dependency(%q<simplecov>, [">= 0.5"])
   end
 end
