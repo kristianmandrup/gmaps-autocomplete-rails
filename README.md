@@ -8,13 +8,15 @@ Some more explanation here: [https://github.com/rjshade/gmaps-autocomplete](http
 
 ## Install
 
+In your project `Gemfile`
+
+```ruby
+gem 'jquery-rails'
+gem 'jquery-ui-rails'
 gem 'gmaps-autocomplete-rails'
+```
 
-You will also need:
-* gem 'jquery-rails'
-* gem 'jquery-ui-rails'
-
-And run `bundle install`;)
+Then run `bundle install`;)
 
 Packed and ready for use with the Asset pipeline :)
 
@@ -58,6 +60,46 @@ $ ->
   GmapsAutoComplete.init()
   GmapsAutoComplete.autoCompleteInit()
 ```
+
+### Tips
+
+To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on the page. For this you could use a simple `Page` model:
+
+```ruby
+class Page
+  include ::ActiveModel::Model
+
+  attr_accessor :name, :type, :mode
+
+  def map?
+    mode && mode.to_s =~ /location/
+  end
+```
+
+Then use the Page in the controller
+
+```ruby
+class PropertiesController < BaseController
+  def show
+    @name = params[:id]
+    @mode = params[:mode] || 'gallery'
+    @page = Page.new name: :property, mode: @mode
+  end
+end
+```
+
+Then use page instance to have fine-grained control over how to display the page!
+
+```erb
+<% if @page.map? %>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<% end %>
+<%= javascript_include_tag "application" %>
+```
+
+Nice ;)
+
+Alternatively perhaps use RequireJS via the `requirejs-rails` gem, and load it "AMD" style, and then use a HTML data attribute to set if the page should load the google map script or not. There are many possibilities and design patterns ;)
 
 ### Configuration options
 
