@@ -103,14 +103,13 @@ class GmapsCompleter
   addMapListeners: (marker, map) ->
     self = @;
     # event triggered when marker is dragged and dropped
-    google.maps.event.addListener(marker, 'dragend', ->
+    google.maps.event.addListener marker, 'dragend', ->
       self.geocodeLookup 'latLng', marker.getPosition()
 
     # event triggered when map is clicked
-    google.maps.event.addListener(map, 'click', (event) ->
+    google.maps.event.addListener map, 'click', (event) ->
       marker.setPosition event.latLng
-      self.geocodeLookup 'latLng', event.latLng
-    )
+      self.geocodeLookup 'latLng', event.latLng    
 
   # move the marker to a new position, and center the map on it
   defaultUpdateMap: (geometry) -> 
@@ -126,7 +125,7 @@ class GmapsCompleter
 
     @debug 'country', @country
 
-    updateAdr = address.replace(', ' + @country, '')
+    updateAdr = address.replace ', ' + @country, ''
     updateAdr = address
 
     @debug 'updateAdr', updateAdr
@@ -138,6 +137,7 @@ class GmapsCompleter
     $('#gmaps-output-latitude').html latLng.lat()
     $('#gmaps-output-longitude').html latLng.lng()
 
+
   # Query the Google geocode object
   #
   # type: 'address' for search by address
@@ -148,7 +148,7 @@ class GmapsCompleter
   # update: should we update the map (center map and position marker)?
   geocodeLookup: ( type, value, update ) ->
     # default value: update = false
-    update = typeof(update) !== 'undefined' ? update : false
+    update ||= false
 
     request = {}
     request[type] = value
@@ -158,12 +158,9 @@ class GmapsCompleter
   performGeocode: (results, status) ->
     @debug 'performGeocode', status
 
-    $(self.errorField).html ''
+    $(@errorField).html ''
 
-    if (status == google.maps.GeocoderStatus.OK)
-      self.geocodeSuccess(results)
-    else
-      self.geocodeFailure(type, value)
+    if (status == google.maps.GeocoderStatus.OK) then @geocodeSuccess(results) else @geocodeFailure(type, value)
 
   geocodeSuccess: (results) ->
     @debug 'geocodeSuccess', results
@@ -179,7 +176,7 @@ class GmapsCompleter
     else
       # Geocoder status ok but no results!?
       @showError @geocodeErrorMsg()
-
+      
   geocodeFailure: (type, value) ->
     @debug 'geocodeFailure', type
     
@@ -189,9 +186,7 @@ class GmapsCompleter
     if (type == 'address')
       # User has typed in an address which we can't geocode to a location
       @showError @invalidAddressMsg(value)
-
     else
-
       # User has clicked or dragged marker to somewhere that Google can't do a reverse lookup for
       # In this case we display a warning, clear the address box, but fill in LatLng
       @showError @noAddressFoundMsg()
@@ -207,8 +202,8 @@ class GmapsCompleter
     "Woah... that's pretty remote! You're going to have to manually enter a place name."
 
   showError: (msg) ->
-    $(this.errorField).html(msg)
-    $(this.errorField).show()
+    $(@errorField).html(msg)
+    $(@errorField).show()
 
     setTimeout( ->
       $(@errorField).hide()
@@ -217,7 +212,7 @@ class GmapsCompleter
   # initialise the jqueryUI autocomplete element
   autoCompleteInit: (opts) ->
     opts      = opts || {}
-    @region   = opts['region'] || @defaultOptions['region']
+    @region   = opts['region']  || @defaultOptions['region']
     @country  = opts['country'] || @defaultOptions['country']
     @debug 'region', @region
 
@@ -228,7 +223,6 @@ class GmapsCompleter
       select: (event,ui) ->
         self.updateUI  ui.item.value, ui.item.geocode.geometry.location
         self.updateMap ui.item.geocode.geometry
-
       # source is the list of input options shown in the autocomplete dropdown.
       # see documentation: http://jqueryui.com/demos/autocomplete/
       source: (request,response) ->
@@ -247,13 +241,19 @@ class GmapsCompleter
         # and a callback function which should process the results into
         # a format accepted by jqueryUI autocomplete
         self.geocoder.geocode(geocodeOpts, (results, status) ->
-          response($.map(results, (item) ->
-            uiAddress = item.formatted_address.replace ", " + self.country, ''
-            # var uiAddress = item.formatted_address;
-            return
-              label: uiAddress # appears in dropdown box
-              value: uiAddress # inserted into input element when selected
-              geocode: item    # all geocode data: used in select callback event
+          response(
+            $.map(results, (item) ->
+              uiAddress = item.formatted_address.replace ", " + self.country, ''
+              # var uiAddress = item.formatted_address;
+              {
+                label: uiAddress # appears in dropdown box
+                value: uiAddress # inserted into input element when selected
+                geocode: item    # all geocode data: used in select callback event
+              }
+            )
+          )
+        )
+    )
 
     # triggered when user presses a key in the address box
     $(self.inputField).bind 'keydown', @keyDownHandler
@@ -261,7 +261,7 @@ class GmapsCompleter
 
   keyDownHandler: (event) ->
     if (event.keyCode == 13)
-      @geocodeLookup 'address', $(self.inputField).val(), true
+      @geocodeLookup 'address', $(@inputField).val(), true
       # ensures dropdown disappears when enter is pressed
       $(@inputField).autocomplete "disable"
     else

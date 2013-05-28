@@ -28,9 +28,13 @@ Add to javascript manifest file, fx `application.js`
 //= require gmaps-autocomplete
 ```
 
-And include the google maps script before `application.js`, fx in your layout file:
+Include the google maps script before `application.js`, fx in your layout file:
 
-See [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
+*Update: Fields with separate Autocomplete instances*
+
+Try `gmaps-auto-complete` a new coffescript class based version, which should allow you to have several fields with separate instances on the same page. As of yet untested, so please help out fixing any bugs/errors.
+
+For more, see [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
 
 *application.html.erb*
 
