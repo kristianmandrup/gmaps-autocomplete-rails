@@ -13,7 +13,7 @@ class GmapsCompleter
 
   # initialise the google maps objects, and add listeners
   mapElem: null
-  zoomLevel: 2 
+  zoomLevel: 2
   mapType: null
   pos: [0, 0]
   inputField: '#gmaps-input-address'
@@ -29,7 +29,7 @@ class GmapsCompleter
     debugOn: false
 
   constructor: (options) ->
-    @init opts
+    @init options
 
   init: (opts) ->
     opts      = opts || {}
@@ -41,13 +41,14 @@ class GmapsCompleter
     lng = pos[1]
 
     mapType = opts['mapType']
+    mapElem = null
     @mapElem =  $("gmaps-canvas")
-    
+
     @mapElem = $(opts['mapElem']).get(0) if opts['mapElem']
-    @mapType = google.maps.MapTypeId.ROADMAP    
-    
+    @mapType = google.maps.MapTypeId.ROADMAP
+
     zoomLevel = opts['zoomLevel']
-    
+
     @inputField = opts['inputField']
     @errorField = opts['#gmaps-error']
     @debugOn    = opts['debugOn']
@@ -82,7 +83,7 @@ class GmapsCompleter
     @debug 'mapElem', @mapElem
 
     return if not mapElem
-    
+
     # create our map object
     @map = new google.maps.Map mapElem, mapOptions
 
@@ -109,10 +110,10 @@ class GmapsCompleter
     # event triggered when map is clicked
     google.maps.event.addListener map, 'click', (event) ->
       marker.setPosition event.latLng
-      self.geocodeLookup 'latLng', event.latLng    
+      self.geocodeLookup 'latLng', event.latLng
 
   # move the marker to a new position, and center the map on it
-  defaultUpdateMap: (geometry) -> 
+  defaultUpdateMap: (geometry) ->
     map     = @map
     marker  = @marker
 
@@ -164,7 +165,7 @@ class GmapsCompleter
 
   geocodeSuccess: (results) ->
     @debug 'geocodeSuccess', results
-    
+
     # Google geocoding has succeeded!
     if results[0]
       # Always update the UI elements with new location data
@@ -176,10 +177,10 @@ class GmapsCompleter
     else
       # Geocoder status ok but no results!?
       @showError @geocodeErrorMsg()
-      
+
   geocodeFailure: (type, value) ->
     @debug 'geocodeFailure', type
-    
+
     # Google Geocoding has failed. Two common reasons:
     #   * Address not recognised (e.g. search for 'zxxzcxczxcx')
     #   * Location doesn't map to address (e.g. click in middle of Atlantic)
@@ -223,18 +224,18 @@ class GmapsCompleter
       select: (event,ui) ->
         self.updateUI  ui.item.value, ui.item.geocode.geometry.location
         self.updateMap ui.item.geocode.geometry
-      # source is the list of input options shown in the autocomplete dropdown.
-      # see documentation: http://jqueryui.com/demos/autocomplete/
+    # source is the list of input options shown in the autocomplete dropdown.
+    # see documentation: http://jqueryui.com/demos/autocomplete/
       source: (request,response) ->
         # https://developers.google.com/maps/documentation/geocoding/#RegionCodes
         region_postfix  = ''
         region          = self.region
-        
+
         region_postfix = ', ' + region if region
         address = request.term + region_postfix
 
         self.debug 'geocode address', address
-        
+
         geocodeOpts = {'address': address}
 
         # the geocode method takes an address or LatLng to search for
@@ -246,9 +247,9 @@ class GmapsCompleter
               uiAddress = item.formatted_address.replace ", " + self.country, ''
               # var uiAddress = item.formatted_address;
               {
-                label: uiAddress # appears in dropdown box
-                value: uiAddress # inserted into input element when selected
-                geocode: item    # all geocode data: used in select callback event
+              label: uiAddress # appears in dropdown box
+              value: uiAddress # inserted into input element when selected
+              geocode: item    # all geocode data: used in select callback event
               }
             )
           )
@@ -257,7 +258,7 @@ class GmapsCompleter
 
     # triggered when user presses a key in the address box
     $(self.inputField).bind 'keydown', @keyDownHandler
-    # autocomplete_init
+  # autocomplete_init
 
   keyDownHandler: (event) ->
     if (event.keyCode == 13)
@@ -267,3 +268,6 @@ class GmapsCompleter
     else
       # re-enable if previously disabled above
       $(@inputField).autocomplete "enable"
+
+
+window.GmapsCompleter = GmapsCompleter
