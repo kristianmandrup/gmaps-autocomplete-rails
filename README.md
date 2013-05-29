@@ -22,17 +22,20 @@ Packed and ready for use with the Asset pipeline :)
 
 Add to javascript manifest file, fx `application.js`
 
+(Optional: Try `gmaps-auto-complete` a new coffescript class based version, which should allow you to have several fields with separate instances on the same page. As of yet untested, so please help out fixing any bugs/errors.)
+
 ```
 //= require jquery_ujs
 //= require jquery.ui.all
 //= require gmaps-autocomplete
+//= require gmaps-auto-complete 
 ```
 
 Include the google maps script before `application.js`, fx in your layout file:
 
 *Update: Fields with separate Autocomplete instances*
 
-Try `gmaps-auto-complete` a new coffescript class based version, which should allow you to have several fields with separate instances on the same page. As of yet untested, so please help out fixing any bugs/errors.
+
 
 For more, see [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
 
@@ -64,6 +67,38 @@ $ ->
   GmapsAutoComplete.init()
   GmapsAutoComplete.autoCompleteInit()
 ```
+
+## Initialize (with new coffeescript class based version)
+
+*application.js*
+```javascript
+$(document).ready(function() {
+    var temp;
+    temp = new GmapsCompleter({
+        inputField: '#gmaps-input-address',
+        errorField: '#gmaps-error'
+    });
+    temp.autoCompleteInit({
+        region: "washington dc",
+        country: "us"
+    });
+});
+```
+or coffeescript
+
+*yourmodel.js.coffee*
+
+```
+$ ->
+  temp = new GmapsCompleter
+    inputField: '#gmaps-input-address',
+    errorField: '#gmaps-error'
+  temp.autoCompleteInit
+    region: "washington dc"
+    country: "us"
+  return  
+```
+
 
 ### Tips
 
@@ -219,6 +254,14 @@ For [formtastic](https://github.com/justinfrench/formtastic) something like:
 = semantic_form_for @search do |f|
   = f.input :address, placeholder: 'find address'
   %span#address_error
+```
+
+Or,
+
+```ruby
+<%= semantic_form_for(@search) do |f| %>
+	<%= f.input :pickupAddress, :as => :string, :label => "House/Apt Number and Street", :input_html => { :id => "gmaps-input-address", :style => "width:350px; font-size:14px", :placeholder => "Start typing an address or location" } %>
+	...
 ```
 
 And matching configuration in your javascript:
