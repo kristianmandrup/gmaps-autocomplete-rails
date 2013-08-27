@@ -13,20 +13,11 @@ class GmapsCompleter
 
   # initialise the google maps objects, and add listeners
   mapElem: null
-  zoomLevel: 2 
+  zoomLevel: 2
   mapType: null
   pos: [0, 0]
   inputField: '#gmaps-input-address'
   errorField: '#gmaps-error'
-
-  defaultOptions:
-    mapElem: '#gmaps-canvas'
-    zoomLevel: 2
-    mapType: google.maps.MapTypeId.ROADMAP
-    pos: [0, 0]
-    inputField: '#gmaps-input-address'
-    errorField: '#gmaps-error'
-    debugOn: false
 
   constructor: (opts) ->
     @init opts
@@ -34,29 +25,51 @@ class GmapsCompleter
   init: (opts) ->
     opts      = opts || {}
     callOpts  = $.extend true, {}, opts
-    opts      = $.extend true, {}, @defaultOptions, opts
 
-    pos = opts['pos']
-    lat = pos[0]
-    lng = pos[1]
+    @debugOn    = opts['debugOn']
 
-    mapType = opts['mapType']
-    @mapElem =  $("gmaps-canvas")
+    @debug 'init(opts)', opts
+
+    completerAssistClass = opts['assist']
+
+    try       
+      @assist = new completerAssistClass
+
+    catch error
+      @debug 'assist error', error, opts['assist']
     
-    @mapElem = $(opts['mapElem']).get(0) if opts['mapElem']
-    @mapType = google.maps.MapTypeId.ROADMAP    
+    @assist ||= new GmapsCompleterDefaultAssist
     
+    @defaultOptions = opts['defaultOptions'] || @assist.options
+    opts  = $.extend true, {}, @defaultOptions, opts
+
+    @positionOutputter  = opts['positionOutputter'] || @assist.positionOutputter
+    @updateUI           = opts['updateUI'] || @assist.updateUI
+    @updateMap          = opts['updateMap'] || @assist.updateMap
+
+    @geocodeErrorMsg    = opts['geocodeErrorMsg'] || @assist.geocodeErrorMsg
+    @geocodeErrorMsg    = opts['geocodeErrorMsg'] || @assist.geocodeErrorMsg
+    @noAddressFoundMsg  = opts['noAddressFoundMsg'] || @assist.noAddressFoundMsg
+
+    pos   = opts['pos']
+    lat   = pos[0]
+    lng   = pos[1]
+
+    mapType   = opts['mapType']
+    mapElem   = null
+    @mapElem  =  $("gmaps-canvas")
+
+    @mapElem  = $(opts['mapElem']).get(0) if opts['mapElem']
+    @mapType  = google.maps.MapTypeId.ROADMAP
+
     zoomLevel = opts['zoomLevel']
-    
+
     @inputField = opts['inputField']
     @errorField = opts['#gmaps-error']
     @debugOn    = opts['debugOn']
 
-    @positionOutputter  = opts['positionOutputter'] || @defaultPositionOutputter
-    @updateUI           = opts['updateUI'] || @defaultUpdateUI
-    @updateMap          = opts['updateMap'] || @defaultUpdateMap
-
     @debug 'called with opts',  callOpts
+    @debug 'final completerAssist', @completerAssist
     @debug 'defaultOptions',    @defaultOptions
     @debug 'options after merge with defaults', opts
 
@@ -76,7 +89,7 @@ class GmapsCompleter
 
     self = @
 
-    if typeof(mapElem) == 'undefined'
+    if typeof(@mapElem) == 'undefined'
       @showError("Map element " + opts['mapElem'] + " could not be resolved!")
 
     @debug 'mapElem', @mapElem
@@ -109,33 +122,7 @@ class GmapsCompleter
     # event triggered when map is clicked
     google.maps.event.addListener map, 'click', (event) ->
       marker.setPosition event.latLng
-      self.geocodeLookup 'latLng', event.latLng    
-
-  # move the marker to a new position, and center the map on it
-  defaultUpdateMap: (geometry) -> 
-    map     = @map
-    marker  = @marker
-
-    map.fitBounds(geometry.viewport) if map
-    marker.setPosition(geometry.location) if marker
-
-  # fill in the UI elements with new position data
-  defaultUpdateUI: (address, latLng) ->
-    $(@inputField).autocomplete 'close'
-
-    @debug 'country', @country
-
-    updateAdr = address.replace ', ' + @country, ''
-    updateAdr = address
-
-    @debug 'updateAdr', updateAdr
-
-    $(@inputField).val updateAdr
-    @positionOutputter latLng
-
-  defaultPositionOutputter: (latLng) ->
-    $('#gmaps-output-latitude').html latLng.lat()
-    $('#gmaps-output-longitude').html latLng.lng()
+      self.geocodeLookup 'latLng', event.latLng
 
 
   # Query the Google geocode object
@@ -164,7 +151,7 @@ class GmapsCompleter
 
   geocodeSuccess: (results) ->
     @debug 'geocodeSuccess', results
-    
+
     # Google geocoding has succeeded!
     if results[0]
       # Always update the UI elements with new location data
@@ -176,10 +163,10 @@ class GmapsCompleter
     else
       # Geocoder status ok but no results!?
       @showError @geocodeErrorMsg()
-      
+
   geocodeFailure: (type, value) ->
     @debug 'geocodeFailure', type
-    
+
     # Google Geocoding has failed. Two common reasons:
     #   * Address not recognised (e.g. search for 'zxxzcxczxcx')
     #   * Location doesn't map to address (e.g. click in middle of Atlantic)
@@ -191,15 +178,6 @@ class GmapsCompleter
       # In this case we display a warning, clear the address box, but fill in LatLng
       @showError @noAddressFoundMsg()
       @updateUI '', value
-
-  geocodeErrorMsg: ->
-    "Sorry, something went wrong. Try again!"
-
-  invalidAddressMsg: (value) ->
-    "Sorry! We couldn't find " + value + ". Try a different search term, or click the map."
-
-  noAddressFoundMsg: ->
-    "Woah... that's pretty remote! You're going to have to manually enter a place name."
 
   showError: (msg) ->
     $(@errorField).html(msg)
@@ -223,18 +201,18 @@ class GmapsCompleter
       select: (event,ui) ->
         self.updateUI  ui.item.value, ui.item.geocode.geometry.location
         self.updateMap ui.item.geocode.geometry
-      # source is the list of input options shown in the autocomplete dropdown.
-      # see documentation: http://jqueryui.com/demos/autocomplete/
+    # source is the list of input options shown in the autocomplete dropdown.
+    # see documentation: http://jqueryui.com/demos/autocomplete/
       source: (request,response) ->
         # https://developers.google.com/maps/documentation/geocoding/#RegionCodes
         region_postfix  = ''
         region          = self.region
-        
+
         region_postfix = ', ' + region if region
         address = request.term + region_postfix
 
         self.debug 'geocode address', address
-        
+
         geocodeOpts = {'address': address}
 
         # the geocode method takes an address or LatLng to search for
@@ -246,9 +224,9 @@ class GmapsCompleter
               uiAddress = item.formatted_address.replace ", " + self.country, ''
               # var uiAddress = item.formatted_address;
               {
-                label: uiAddress # appears in dropdown box
-                value: uiAddress # inserted into input element when selected
-                geocode: item    # all geocode data: used in select callback event
+              label: uiAddress # appears in dropdown box
+              value: uiAddress # inserted into input element when selected
+              geocode: item    # all geocode data: used in select callback event
               }
             )
           )
@@ -267,3 +245,55 @@ class GmapsCompleter
     else
       # re-enable if previously disabled above
       $(@inputField).autocomplete "enable"
+
+
+class GmapsCompleterDefaultAssist
+  options:
+    mapElem: '#gmaps-canvas'
+    zoomLevel: 2
+    mapType: google.maps.MapTypeId.ROADMAP
+    pos: [0, 0]
+    inputField: '#gmaps-input-address'
+    errorField: '#gmaps-error'
+    debugOn: true
+
+  # move the marker to a new position, and center the map on it
+  updateMap: (geometry) ->
+    map     = @map
+    marker  = @marker
+
+    map.fitBounds(geometry.viewport) if map
+    marker.setPosition(geometry.location) if marker    
+
+  # fill in the UI elements with new position data
+  updateUI: (address, latLng) ->
+    inputField = @inputField
+    country = @country
+    
+    $(inputField).autocomplete 'close'
+
+    @debug 'country', country
+
+    updateAdr = address.replace ', ' + country, ''
+    updateAdr = address
+
+    @debug 'updateAdr', updateAdr
+
+    $(inputField).val updateAdr
+    @positionOutputter latLng
+
+  positionOutputter: (latLng) ->
+    $('#gmaps-output-latitude').html latLng.lat()
+    $('#gmaps-output-longitude').html latLng.lng()  
+
+  geocodeErrorMsg: ->
+    "Sorry, something went wrong. Try again!"
+
+  invalidAddressMsg: (value) ->
+    "Sorry! We couldn't find " + value + ". Try a different search term, or click the map."
+
+  noAddressFoundMsg: ->
+    "Woah... that's pretty remote! You're going to have to manually enter a place name."
+
+window.GmapsCompleter = GmapsCompleter
+window.GmapsCompleterDefaultAssist = GmapsCompleterDefaultAssist

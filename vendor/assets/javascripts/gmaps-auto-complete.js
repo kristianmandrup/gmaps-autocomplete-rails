@@ -1,6 +1,4 @@
-var GmapsCompleter;
-
-// console.log('GmapsCompleter');
+var GmapsCompleter, GmapsCompleterDefaultAssist;
 
 GmapsCompleter = (function() {
   GmapsCompleter.prototype.geocoder = null;
@@ -37,30 +35,35 @@ GmapsCompleter = (function() {
 
   GmapsCompleter.prototype.errorField = '#gmaps-error';
 
-  GmapsCompleter.prototype.defaultOptions = {
-    mapElem: '#gmaps-canvas',
-    zoomLevel: 2,
-    mapType: google.maps.MapTypeId.ROADMAP,
-    pos: [0, 0],
-    inputField: '#gmaps-input-address',
-    errorField: '#gmaps-error',
-    debugOn: false
-  };
-
   function GmapsCompleter(opts) {
     this.init(opts);
   }
 
   GmapsCompleter.prototype.init = function(opts) {
-    var callOpts, lat, latlng, lng, mapOptions, mapType, pos, self, zoomLevel;
+    var callOpts, completerAssistClass, error, lat, latlng, lng, mapElem, mapOptions, mapType, pos, self, zoomLevel;
 
     opts = opts || {};
     callOpts = $.extend(true, {}, opts);
+    this.debugOn = opts['debugOn'];
+    this.debug('init(opts)', opts);
+    completerAssistClass = opts['assist'];
+    try {
+      this.assist = new completerAssistClass;
+    } catch (_error) {
+      error = _error;
+      this.debug('assist error', error, opts['assist']);
+    }
+    this.assist || (this.assist = new GmapsCompleterDefaultAssist);
+    this.defaultOptions = opts['defaultOptions'] || this.assist.options;
     opts = $.extend(true, {}, this.defaultOptions, opts);
+    this.positionOutputter = opts['positionOutputter'] || this.assist.positionOutputter;
+    this.updateUI = opts['updateUI'] || this.assist.updateUI;
+    this.updateMap = opts['updateMap'] || this.assist.updateMap;
     pos = opts['pos'];
     lat = pos[0];
     lng = pos[1];
     mapType = opts['mapType'];
+    mapElem = null;
     this.mapElem = $("gmaps-canvas");
     if (opts['mapElem']) {
       this.mapElem = $(opts['mapElem']).get(0);
@@ -70,10 +73,8 @@ GmapsCompleter = (function() {
     this.inputField = opts['inputField'];
     this.errorField = opts['#gmaps-error'];
     this.debugOn = opts['debugOn'];
-    this.positionOutputter = opts['positionOutputter'] || this.defaultPositionOutputter;
-    this.updateUI = opts['updateUI'] || this.defaultUpdateUI;
-    this.updateMap = opts['updateMap'] || this.defaultUpdateMap;
     this.debug('called with opts', callOpts);
+    this.debug('final completerAssist', this.completerAssist);
     this.debug('defaultOptions', this.defaultOptions);
     this.debug('options after merge with defaults', opts);
     latlng = new google.maps.LatLng(lat, lng);
@@ -122,36 +123,6 @@ GmapsCompleter = (function() {
       marker.setPosition(event.latLng);
       return self.geocodeLookup('latLng', event.latLng);
     });
-  };
-
-  GmapsCompleter.prototype.defaultUpdateMap = function(geometry) {
-    var map, marker;
-
-    map = this.map;
-    marker = this.marker;
-    if (map) {
-      map.fitBounds(geometry.viewport);
-    }
-    if (marker) {
-      return marker.setPosition(geometry.location);
-    }
-  };
-
-  GmapsCompleter.prototype.defaultUpdateUI = function(address, latLng) {
-    var updateAdr;
-
-    $(this.inputField).autocomplete('close');
-    this.debug('country', this.country);
-    updateAdr = address.replace(', ' + this.country, '');
-    updateAdr = address;
-    this.debug('updateAdr', updateAdr);
-    $(this.inputField).val(updateAdr);
-    return this.positionOutputter(latLng);
-  };
-
-  GmapsCompleter.prototype.defaultPositionOutputter = function(latLng) {
-    $('#gmaps-output-latitude').html(latLng.lat());
-    return $('#gmaps-output-longitude').html(latLng.lng());
   };
 
   GmapsCompleter.prototype.geocodeLookup = function(type, value, update) {
@@ -271,3 +242,55 @@ GmapsCompleter = (function() {
 
 })();
 
+GmapsCompleterDefaultAssist = (function() {
+  function GmapsCompleterDefaultAssist() {}
+
+  GmapsCompleterDefaultAssist.prototype.options = {
+    mapElem: '#gmaps-canvas',
+    zoomLevel: 2,
+    mapType: google.maps.MapTypeId.ROADMAP,
+    pos: [0, 0],
+    inputField: '#gmaps-input-address',
+    errorField: '#gmaps-error',
+    debugOn: true
+  };
+
+  GmapsCompleterDefaultAssist.prototype.updateMap = function(geometry) {
+    var map, marker;
+
+    map = this.map;
+    marker = this.marker;
+    if (map) {
+      map.fitBounds(geometry.viewport);
+    }
+    if (marker) {
+      return marker.setPosition(geometry.location);
+    }
+  };
+
+  GmapsCompleterDefaultAssist.prototype.updateUI = function(address, latLng) {
+    var country, inputField, updateAdr;
+
+    inputField = this.inputField;
+    country = this.country;
+    $(inputField).autocomplete('close');
+    this.debug('country', country);
+    updateAdr = address.replace(', ' + country, '');
+    updateAdr = address;
+    this.debug('updateAdr', updateAdr);
+    $(inputField).val(updateAdr);
+    return this.positionOutputter(latLng);
+  };
+
+  GmapsCompleterDefaultAssist.prototype.positionOutputter = function(latLng) {
+    $('#gmaps-output-latitude').html(latLng.lat());
+    return $('#gmaps-output-longitude').html(latLng.lng());
+  };
+
+  return GmapsCompleterDefaultAssist;
+
+})();
+
+window.GmapsCompleter = GmapsCompleter;
+
+window.GmapsCompleterDefaultAssist = GmapsCompleterDefaultAssist;

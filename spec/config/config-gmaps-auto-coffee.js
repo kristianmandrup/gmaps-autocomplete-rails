@@ -4,7 +4,8 @@
 
     completer = new GmapsCompleter({
       inputField: '#gmaps-input-address',
-      errorField: '#gmaps-error'
+      errorField: '#gmaps-error',
+      debugOn: true
     });
     return completer.autoCompleteInit({
       country: "us"

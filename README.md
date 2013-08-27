@@ -2,9 +2,15 @@
 
 Extracted from [gmaps-autocomplete](https://github.com/rjshade/gmaps-autocomplete) and improved markedly and then packaged for use with Rails as an asset gem :)
 
-See it in action here: [http://rjshade.com/projects/gmaps-autocomplete/](http://rjshade.com/projects/gmaps-autocomplete/)
+## General info
 
-Some more explanation here: [https://github.com/rjshade/gmaps-autocomplete](https://github.com/rjshade/gmaps-autocomplete)
+The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page. 
+
+I recommend that you also check out: [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
+
+## Upgrading
+
+Version 1.3 now comes only with a Class based GmapsCompleter. The old static GmapsCompleter container, used in version 1.2 (and below) has been deprecated. Please upgrade your configuration functionality as demonstrated in the usage/config instructions below.
 
 ## Install
 
@@ -30,10 +36,6 @@ Add to javascript manifest file, fx `application.js`
 
 Include the google maps script before `application.js`, fx in your layout file:
 
-The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page. 
-
-For more, see [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
-
 *application.html.erb*
 
 ```erb
@@ -45,7 +47,9 @@ Note also that the autocomplete script depends on jQuery 1.6+.
 
 ## Initialize
 
-*application.js*
+Add functionality that is executed after the document (and all scripts) have been fully loaded. Example:
+
+*mypage.js*
 
 ```javascript
 jQuery(function() {
@@ -64,7 +68,7 @@ jQuery(function() {
 
 or using Coffeescript
 
-*yourmodel.js.coffee*
+*mypage.js.coffee*
 
 ```
 jQuery ->
@@ -76,53 +80,12 @@ jQuery ->
         country: "us"
 ```
 
-### Tips
-
-To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on whether the page needs it. 
-For this you could use a simple `Page` model, something like this:
-
-```ruby
-class Page
-  include ::ActiveModel::Model
-
-  attr_accessor :name, :type, :mode
-
-  def map?
-    mode && mode.to_s =~ /location/
-  end
-```
-
-Then use the Page in the controller
-
-```ruby
-class PropertiesController < BaseController
-  def show
-    @name = params[:id]
-    @mode = params[:mode] || 'gallery'
-    @page = Page.new name: :property, mode: @mode
-  end
-end
-```
-
-Then use page instance to have fine-grained control over how to display the page!
-
-```erb
-<% if @page.map? %>
-  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
-<% end %>
-<%= javascript_include_tag "application" %>
-```
-
-This could fx be integrated into your page layouts (layout files) or similar.
-
-Alternatively perhaps use RequireJS via the `requirejs-rails` gem, and load it "AMD" style, and then use a HTML data attribute to set if the page should load the google map script or not. There are many ways to achieve this...
-
 ### Configuration options
 
-The constructor function (or `init()` for `gmaps-autocomplete-old.js` ) can take a configuration option hash that can configure the specific workings of the `GmapsAutoCompleter`. It uses the following defaults:
+The constructor function can take a configuration option hash that can configure the specific workings of the `GmapsCompleter`. It uses the following defaults:
 
 ```javascript
-defaultOptions = {
+{
   mapElem: "#gmaps-canvas", 
   zoomLevel: 2, 
   mapType: google.maps.MapTypeId.ROADMAP,
@@ -135,15 +98,13 @@ defaultOptions = {
 
 The following default methods can be replaced by configuration:
 
-```javascript
-  positionOutputter: this.defaultPositionOutputter,
-  updateUI : this.defaultUpdateUI,
-  updateMap : this.defaultUpdateMap
-```
+* positionOutputter
+* updateUI
+* updateMap
 
-These methods are used to control how the data is used to update the UI on the page, such as the position output and map position update. Customize these as you need.
+These methods are used to control how the gmaps data is used to update the UI on the page, such as the position output and map position update. Customize these needed.
 
-The default logic is shown here:
+The default logic (taken from GmapsCompleterDefaultAssist) is:
 
 ```coffeescript
   defaultUpdateMap: (geometry) -> 
@@ -174,7 +135,9 @@ The default logic is shown here:
 
 The default update UI logic removes the country from the address displayed.
 
-Note that `autoCompleteInit` also takes an option hash, but currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) and `country` can be used.
+## autoCompleteInit
+
+The function `autoCompleteInit`, called on an instance of GmapsCompleter, can takes an option hash. Currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) and `country` can be used.
 
 Example:
 
@@ -184,7 +147,57 @@ autoCompleteInit({region: 'DK', country: 'Denmark'});
 
 Will make searches in the DK region and remove `', Denmark'` from the result.
 
-## Use with Rails form helpers
+Note: Not sure if this is still useful with the new instance based approach!?
+
+## Assist object
+
+The options hash for the constructor can now take an `assist` object as an argument.
+The `assist` object can be a class or a simple object containing the following:
+
+```coffeescript
+  options:
+    mapElem: '#gmaps-canvas'
+    zoomLevel: 2
+    mapType: google.maps.MapTypeId.ROADMAP
+    pos: [0, 0]
+    inputField: '#gmaps-input-address'
+    errorField: '#gmaps-error'
+    debugOn: true  
+  
+  # update marker and map
+  updateMap: (geometry) ->
+
+  # fill in the UI elements with new position data
+  updateUI: (address, latLng) ->
+
+  # display current position
+  positionOutputter: (latLng) ->
+
+  # optionally also message functions (see below)
+```
+
+If you use a class you can use Coffeescript `extends` (see http://coffeescript.org/#classes) to subclass the default implementation. You can then optionally use `super` to call the base implementation.
+
+Example:
+
+```coffeescript
+class MyCompleterAssist extends GmapsCompleterDefaultAssist
+  updateUI: (address, latLng) ->
+    console.log "Doing my own thang!"
+    // ...
+    
+    super (address, latLng)
+```
+
+Usage (config):
+
+```coffeescript
+    completer = new GmapsCompleter
+        inputField: '#gmaps-my-input-address'
+        assist: MyCompleterAssist
+```
+
+## Usage with Rails form helpers
 
 Simple form example:
 
@@ -229,9 +242,11 @@ updateUi: function( address, latLng ) {
 }
 ```
 
+Note that you can encapsulate this kind of customization using the `assist` option and an Assist object/class as demonstrated above.
+
 ## Customizing messages
 
-For now, directly define your own implementation (override) the following functions directly on GmapsAutoComplete
+The following message functions can be customized, either by passing in the options hash, overriding directly on the GmapsCompleter object or even by using the Assist object/class.
 
 * geocodeErrorMsg: function()
 * invalidAddressMsg: function(value)
@@ -241,10 +256,16 @@ Example:
 
 ```javascript
 
-GmapsAutoComplete.geocodeErrorMsg = function() {
+GmapsCompleter.prototype.geocodeErrorMsg = function() {
   "Geocode error!"
 }
 ```
+
+Here, ensuring that ALL instances of `GmapsCompleter` will use this functionality as the baseline (since overriding the prototype function).
+
+### Localizing messages
+
+For localization/internationalization support, you could customize your Assist object constructor to set the current locale and then have your custom `xMsg` functions use this locale to display the localized message.
 
 ## Formtastic example
 
@@ -256,20 +277,71 @@ For [formtastic](https://github.com/justinfrench/formtastic) something like:
   %span#address_error
 ```
 
+Or,
+
+```ruby
+<%= semantic_form_for(@search) do |f| %>
+	<%= f.input :pickupAddress, :as => :string, :label => "House/Apt Number and Street", :input_html => { :id => "gmaps-input-address", :style => "width:350px; font-size:14px", :placeholder => "Start typing an address or location" } %>
+	...
+```
+
 And matching configuration in your javascript:
 
 ```javascript
 $(document).ready(function() { 
-  GmapsAutoComplete.init({inputField: 'form#search #address', errorField: 'form#search #address_error'});
-  GmapsAutoComplete.autoCompleteInit({region: 'DK'});
+  var completer;
+  completer = new GmapsCompleter({inputField: 'form#search #address', errorField: 'form#search #address_error'});
+  completer.autoCompleteInit({region: 'DK'});
 });
 ```
+
+### Tips
+
+To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on whether the page needs it. 
+For this you could use a simple `Page` model, something like this:
+
+```ruby
+class Page
+  include ::ActiveModel::Model
+
+  attr_accessor :name, :type, :mode
+
+  def map?
+    mode && mode.to_s =~ /location/
+  end
+```
+
+Then use the Page in the controller
+
+```ruby
+class PropertiesController < BaseController
+  def show
+    @name = params[:id]
+    @mode = params[:mode] || 'gallery'
+    @page = Page.new name: :property, mode: @mode
+  end
+end
+```
+
+Then use page instance to have fine-grained control over how to display the page!
+
+```erb
+<% if @page.map? %>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<% end %>
+<%= javascript_include_tag "application" %>
+```
+
+This could fx be integrated into your page layouts (layout files) or similar.
+
+Alternatively perhaps use RequireJS via the `requirejs-rails` gem, and load it "AMD" style, and then use a HTML data attribute to set if the page should load the google map script or not. There are many ways to achieve this...
 
 Enjoy!
 
 ## TODO
 
-* better Javascript encapsulation
+* even better class based functionality encapsulation
+* possibly remove `autoCompleteInit` ??
 
 Please help out with suggestions and improvements etc!
 

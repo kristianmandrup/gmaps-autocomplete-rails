@@ -1,3 +1,8 @@
+## 0.1.3
+
+- Fixed bugs in Coffee script version
+- Deprecated old static namespace version
+
 ## 0.1.2
 
 - Fixed some bugs
