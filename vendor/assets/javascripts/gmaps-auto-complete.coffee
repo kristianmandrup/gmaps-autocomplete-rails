@@ -28,7 +28,7 @@ class GmapsCompleter
     errorField: '#gmaps-error'
     debugOn: false
 
-  constructor: (options) ->
+  constructor: (opts) ->
     @init opts
 
   init: (opts) ->
@@ -81,10 +81,10 @@ class GmapsCompleter
 
     @debug 'mapElem', @mapElem
 
-    return if not mapElem
+    return if not @mapElem
     
     # create our map object
-    @map = new google.maps.Map mapElem, mapOptions
+    @map = new google.maps.Map @mapElem, mapOptions
 
     return if not @map
 
@@ -256,12 +256,12 @@ class GmapsCompleter
     )
 
     # triggered when user presses a key in the address box
-    $(self.inputField).bind 'keydown', @keyDownHandler
+    $(self.inputField).bind 'keydown', @, @keyDownHandler
     # autocomplete_init
 
-  keyDownHandler: (event) ->
+  keyDownHandler: (event, completer) ->
     if (event.keyCode == 13)
-      @geocodeLookup 'address', $(@inputField).val(), true
+      completer.geocodeLookup 'address', $(@inputField).val(), true
       # ensures dropdown disappears when enter is pressed
       $(@inputField).autocomplete "disable"
     else

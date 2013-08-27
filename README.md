@@ -25,14 +25,12 @@ Add to javascript manifest file, fx `application.js`
 ```
 //= require jquery_ujs
 //= require jquery.ui.all
-//= require gmaps-autocomplete
+//= require gmaps-auto-complete
 ```
 
 Include the google maps script before `application.js`, fx in your layout file:
 
-*Update: Fields with separate Autocomplete instances*
-
-Try `gmaps-auto-complete` a new coffescript class based version, which should allow you to have several fields with separate instances on the same page. As of yet untested, so please help out fixing any bugs/errors.
+The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page. 
 
 For more, see [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
 
@@ -50,24 +48,38 @@ Note also that the autocomplete script depends on jQuery 1.6+.
 *application.js*
 
 ```javascript
-$(document).ready(function() { 
-  GmapsAutoComplete.init();
-  GmapsAutoComplete.autoCompleteInit();
+jQuery(function() {
+  var completer;
+
+  completer = new GmapsCompleter({
+    inputField: '#gmaps-input-address',
+    errorField: '#gmaps-error'
+  });
+
+  completer.autoCompleteInit({
+    country: "us"
+  });
 });
 ```
-or coffeescript
+
+or using Coffeescript
 
 *yourmodel.js.coffee*
 
 ```
-$ ->
-  GmapsAutoComplete.init()
-  GmapsAutoComplete.autoCompleteInit()
+jQuery ->
+    completer = new GmapsCompleter
+        inputField: '#gmaps-input-address'
+        errorField: '#gmaps-error'
+
+    completer.autoCompleteInit
+        country: "us"
 ```
 
 ### Tips
 
-To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on the page. For this you could use a simple `Page` model:
+To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on whether the page needs it. 
+For this you could use a simple `Page` model, something like this:
 
 ```ruby
 class Page
@@ -101,29 +113,13 @@ Then use page instance to have fine-grained control over how to display the page
 <%= javascript_include_tag "application" %>
 ```
 
-Nice ;)
+This could fx be integrated into your page layouts (layout files) or similar.
 
-Alternatively perhaps use RequireJS via the `requirejs-rails` gem, and load it "AMD" style, and then use a HTML data attribute to set if the page should load the google map script or not. There are many possibilities and design patterns ;)
+Alternatively perhaps use RequireJS via the `requirejs-rails` gem, and load it "AMD" style, and then use a HTML data attribute to set if the page should load the google map script or not. There are many ways to achieve this...
 
 ### Configuration options
 
-`init()` can take an option hash, using the following defaults:
-
-```javascript
-defaultOptions = {
-  mapElem: "#gmaps-canvas", 
-  zoomLevel: 2, 
-  mapType: google.maps.MapTypeId.ROADMAP,
-  pos: [51.751724, -1.255284],
-  inputField: '#gmaps-input-address',
-  errorField: '#gmaps-error',
-  debugOn: false
-};
-```
-
-### Advanced Configuration
-
-`init()` can take an option hash, using the following defaults:
+The constructor function (or `init()` for `gmaps-autocomplete-old.js` ) can take a configuration option hash that can configure the specific workings of the `GmapsAutoCompleter`. It uses the following defaults:
 
 ```javascript
 defaultOptions = {
@@ -145,7 +141,42 @@ The following default methods can be replaced by configuration:
   updateMap : this.defaultUpdateMap
 ```
 
-`autoCompleteInit` also takes an option hash, but currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) and country can be used.
+These methods are used to control how the data is used to update the UI on the page, such as the position output and map position update. Customize these as you need.
+
+The default logic is shown here:
+
+```coffeescript
+  defaultUpdateMap: (geometry) -> 
+    map     = @map
+    marker  = @marker
+
+    map.fitBounds(geometry.viewport) if map
+    marker.setPosition(geometry.location) if marker
+
+  # fill in the UI elements with new position data
+  defaultUpdateUI: (address, latLng) ->
+    $(@inputField).autocomplete 'close'
+
+    @debug 'country', @country
+
+    updateAdr = address.replace ', ' + @country, ''
+    updateAdr = address
+
+    @debug 'updateAdr', updateAdr
+
+    $(@inputField).val updateAdr
+    @positionOutputter latLng
+
+  defaultPositionOutputter: (latLng) ->
+    $('#gmaps-output-latitude').html latLng.lat()
+    $('#gmaps-output-longitude').html latLng.lng()
+```
+
+The default update UI logic removes the country from the address displayed.
+
+Note that `autoCompleteInit` also takes an option hash, but currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) and `country` can be used.
+
+Example:
 
 ```javascript
 autoCompleteInit({region: 'DK', country: 'Denmark'});
@@ -155,6 +186,8 @@ Will make searches in the DK region and remove `', Denmark'` from the result.
 
 ## Use with Rails form helpers
 
+Simple form example:
+
 ```ruby
 = simple_form_for(@post) do |f|
     = f.input :address, :input_html =>{:id => 'gmaps-input-address'}, :placeholder => 'Start typing a place...'
@@ -162,7 +195,9 @@ Will make searches in the DK region and remove `', Denmark'` from the result.
 
 ## Examples
 
-See `spec/index.html` for an example page using this "plugin". Note that if you set `mapElem`to null or leave out that element on the page, the autocomplete will function without attempting to update the map :)
+See `spec/test-gmaps-auto-coffee.html` for an example page using this "plugin". Note that if you set `mapElem` to null or leave out that element on the page, the autocomplete will function without attempting to update the map :)
+
+This is very useful in scenarios where you want to geolocate the address without displaying on the map.
 
 ## Advanced Customization
 
@@ -235,7 +270,6 @@ Enjoy!
 ## TODO
 
 * better Javascript encapsulation
-* translation to Coffeescript using Coffee classes :)
 
 Please help out with suggestions and improvements etc!
 
