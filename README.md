@@ -4,7 +4,7 @@ Extracted from [gmaps-autocomplete](https://github.com/rjshade/gmaps-autocomplet
 
 ## General info
 
-The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page. 
+The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page.
 
 I recommend that you also check out: [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
 
@@ -31,7 +31,7 @@ Add to javascript manifest file, fx `application.js`
 ```
 //= require jquery_ujs
 //= require jquery.ui.all
-//= require gmaps-auto-complete
+//= require gmaps-autocomplete
 ```
 
 Include the google maps script before `application.js`, fx in your layout file:
@@ -86,8 +86,8 @@ The constructor function can take a configuration option hash that can configure
 
 ```javascript
 {
-  mapElem: "#gmaps-canvas", 
-  zoomLevel: 2, 
+  mapElem: "#gmaps-canvas",
+  zoomLevel: 2,
   mapType: google.maps.MapTypeId.ROADMAP,
   pos: [51.751724, -1.255284],
   inputField: '#gmaps-input-address',
@@ -107,7 +107,7 @@ These methods are used to control how the gmaps data is used to update the UI on
 The default logic (taken from GmapsCompleterDefaultAssist) is:
 
 ```coffeescript
-  defaultUpdateMap: (geometry) -> 
+  defaultUpdateMap: (geometry) ->
     map     = @map
     marker  = @marker
 
@@ -162,8 +162,8 @@ The `assist` object can be a class or a simple object containing the following:
     pos: [0, 0]
     inputField: '#gmaps-input-address'
     errorField: '#gmaps-error'
-    debugOn: true  
-  
+    debugOn: true
+
   # update marker and map
   updateMap: (geometry) ->
 
@@ -185,7 +185,7 @@ class MyCompleterAssist extends GmapsCompleterDefaultAssist
   updateUI: (address, latLng) ->
     console.log "Doing my own thang!"
     // ...
-    
+
     super (address, latLng)
 ```
 
@@ -288,7 +288,7 @@ Or,
 And matching configuration in your javascript:
 
 ```javascript
-$(document).ready(function() { 
+$(document).ready(function() {
   var completer;
   completer = new GmapsCompleter({inputField: 'form#search #address', errorField: 'form#search #address_error'});
   completer.autoCompleteInit({region: 'DK'});
@@ -297,7 +297,7 @@ $(document).ready(function() {
 
 ### Tips
 
-To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on whether the page needs it. 
+To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on whether the page needs it.
 For this you could use a simple `Page` model, something like this:
 
 ```ruby
@@ -346,7 +346,7 @@ Enjoy!
 Please help out with suggestions and improvements etc!
 
 ## Contributing to gmaps-autocomplete-rails
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
 * Fork the project.
