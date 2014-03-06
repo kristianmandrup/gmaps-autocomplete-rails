@@ -195,14 +195,16 @@ class GmapsCompleter
     @debug 'region', @region
 
     self = @
-
-    $(@inputField).autocomplete(
+    
+    autocompleteOpts = opts['autocomplete'] || {}
+    
+    defaultAutocompleteOpts = 
       # event triggered when drop-down option selected
       select: (event,ui) ->
         self.updateUI  ui.item.value, ui.item.geocode.geometry.location
         self.updateMap ui.item.geocode.geometry
-    # source is the list of input options shown in the autocomplete dropdown.
-    # see documentation: http://jqueryui.com/demos/autocomplete/
+      # source is the list of input options shown in the autocomplete dropdown.
+      # see documentation: http://jqueryui.com/demos/autocomplete/
       source: (request,response) ->
         # https://developers.google.com/maps/documentation/geocoding/#RegionCodes
         region_postfix  = ''
@@ -231,10 +233,13 @@ class GmapsCompleter
             )
           )
         )
-    )
+
+    autocompleteOpts = $.extend true, defaultAutocompleteOpts, autocompleteOpts
+
+    $(@inputField).autocomplete(autocompleteOpts)
 
     # triggered when user presses a key in the address box
-    $(self.inputField).bind 'keydown', @, @keyDownHandler
+    $(@inputField).bind 'keydown', @, @keyDownHandler
     # autocomplete_init
 
   keyDownHandler: (event, completer) ->

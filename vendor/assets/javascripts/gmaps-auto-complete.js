@@ -41,7 +41,6 @@ GmapsCompleter = (function() {
 
   GmapsCompleter.prototype.init = function(opts) {
     var callOpts, completerAssistClass, error, lat, latlng, lng, mapElem, mapOptions, mapType, pos, self, zoomLevel;
-
     opts = opts || {};
     callOpts = $.extend(true, {}, opts);
     this.debugOn = opts['debugOn'];
@@ -59,6 +58,9 @@ GmapsCompleter = (function() {
     this.positionOutputter = opts['positionOutputter'] || this.assist.positionOutputter;
     this.updateUI = opts['updateUI'] || this.assist.updateUI;
     this.updateMap = opts['updateMap'] || this.assist.updateMap;
+    this.geocodeErrorMsg = opts['geocodeErrorMsg'] || this.assist.geocodeErrorMsg;
+    this.geocodeErrorMsg = opts['geocodeErrorMsg'] || this.assist.geocodeErrorMsg;
+    this.noAddressFoundMsg = opts['noAddressFoundMsg'] || this.assist.noAddressFoundMsg;
     pos = opts['pos'];
     lat = pos[0];
     lng = pos[1];
@@ -114,7 +116,6 @@ GmapsCompleter = (function() {
 
   GmapsCompleter.prototype.addMapListeners = function(marker, map) {
     var self;
-
     self = this;
     google.maps.event.addListener(marker, 'dragend', function() {
       return self.geocodeLookup('latLng', marker.getPosition());
@@ -127,7 +128,6 @@ GmapsCompleter = (function() {
 
   GmapsCompleter.prototype.geocodeLookup = function(type, value, update) {
     var request;
-
     update || (update = false);
     request = {};
     request[type] = value;
@@ -166,18 +166,6 @@ GmapsCompleter = (function() {
     }
   };
 
-  GmapsCompleter.prototype.geocodeErrorMsg = function() {
-    return "Sorry, something went wrong. Try again!";
-  };
-
-  GmapsCompleter.prototype.invalidAddressMsg = function(value) {
-    return "Sorry! We couldn't find " + value + ". Try a different search term, or click the map.";
-  };
-
-  GmapsCompleter.prototype.noAddressFoundMsg = function() {
-    return "Woah... that's pretty remote! You're going to have to manually enter a place name.";
-  };
-
   GmapsCompleter.prototype.showError = function(msg) {
     $(this.errorField).html(msg);
     $(this.errorField).show();
@@ -187,21 +175,20 @@ GmapsCompleter = (function() {
   };
 
   GmapsCompleter.prototype.autoCompleteInit = function(opts) {
-    var self;
-
+    var autocompleteOpts, defaultAutocompleteOpts, self;
     opts = opts || {};
     this.region = opts['region'] || this.defaultOptions['region'];
     this.country = opts['country'] || this.defaultOptions['country'];
     this.debug('region', this.region);
     self = this;
-    $(this.inputField).autocomplete({
+    autocompleteOpts = opts['autocomplete'] || {};
+    defaultAutocompleteOpts = {
       select: function(event, ui) {
         self.updateUI(ui.item.value, ui.item.geocode.geometry.location);
         return self.updateMap(ui.item.geocode.geometry);
       },
       source: function(request, response) {
         var address, geocodeOpts, region, region_postfix;
-
         region_postfix = '';
         region = self.region;
         if (region) {
@@ -215,7 +202,6 @@ GmapsCompleter = (function() {
         return self.geocoder.geocode(geocodeOpts, function(results, status) {
           return response($.map(results, function(item) {
             var uiAddress;
-
             uiAddress = item.formatted_address.replace(", " + self.country, '');
             return {
               label: uiAddress,
@@ -225,8 +211,10 @@ GmapsCompleter = (function() {
           }));
         });
       }
-    });
-    return $(self.inputField).bind('keydown', this, this.keyDownHandler);
+    };
+    autocompleteOpts = $.extend(true, defaultAutocompleteOpts, autocompleteOpts);
+    $(this.inputField).autocomplete(autocompleteOpts);
+    return $(this.inputField).bind('keydown', this, this.keyDownHandler);
   };
 
   GmapsCompleter.prototype.keyDownHandler = function(event, completer) {
@@ -257,7 +245,6 @@ GmapsCompleterDefaultAssist = (function() {
 
   GmapsCompleterDefaultAssist.prototype.updateMap = function(geometry) {
     var map, marker;
-
     map = this.map;
     marker = this.marker;
     if (map) {
@@ -270,7 +257,6 @@ GmapsCompleterDefaultAssist = (function() {
 
   GmapsCompleterDefaultAssist.prototype.updateUI = function(address, latLng) {
     var country, inputField, updateAdr;
-
     inputField = this.inputField;
     country = this.country;
     $(inputField).autocomplete('close');
@@ -285,6 +271,18 @@ GmapsCompleterDefaultAssist = (function() {
   GmapsCompleterDefaultAssist.prototype.positionOutputter = function(latLng) {
     $('#gmaps-output-latitude').html(latLng.lat());
     return $('#gmaps-output-longitude').html(latLng.lng());
+  };
+
+  GmapsCompleterDefaultAssist.prototype.geocodeErrorMsg = function() {
+    return "Sorry, something went wrong. Try again!";
+  };
+
+  GmapsCompleterDefaultAssist.prototype.invalidAddressMsg = function(value) {
+    return "Sorry! We couldn't find " + value + ". Try a different search term, or click the map.";
+  };
+
+  GmapsCompleterDefaultAssist.prototype.noAddressFoundMsg = function() {
+    return "Woah... that's pretty remote! You're going to have to manually enter a place name.";
   };
 
   return GmapsCompleterDefaultAssist;
