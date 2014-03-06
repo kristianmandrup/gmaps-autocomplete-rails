@@ -1,4 +1,5 @@
-var GmapsCompleter, GmapsCompleterDefaultAssist;
+var GmapsCompleter, GmapsCompleterDefaultAssist,
+  __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; };
 
 GmapsCompleter = (function() {
   GmapsCompleter.prototype.geocoder = null;
@@ -36,6 +37,8 @@ GmapsCompleter = (function() {
   GmapsCompleter.prototype.errorField = '#gmaps-error';
 
   function GmapsCompleter(opts) {
+    this.keyDownHandler = __bind(this.keyDownHandler, this);
+    this.performGeocode = __bind(this.performGeocode, this);
     this.init(opts);
   }
 
@@ -128,10 +131,10 @@ GmapsCompleter = (function() {
 
   GmapsCompleter.prototype.geocodeLookup = function(type, value, update) {
     var request;
-    update || (update = false);
+    this.update || (this.update = false);
     request = {};
     request[type] = value;
-    return this.geocoder.geocode(request, performGeocode);
+    return this.geocoder.geocode(request, this.performGeocode);
   };
 
   GmapsCompleter.prototype.performGeocode = function(results, status) {
@@ -148,7 +151,7 @@ GmapsCompleter = (function() {
     this.debug('geocodeSuccess', results);
     if (results[0]) {
       this.updateUI(results[0].formatted_address, results[0].geometry.location);
-      if (update) {
+      if (this.update) {
         return this.updateMap(results[0].geometry);
       }
     } else {
@@ -214,12 +217,12 @@ GmapsCompleter = (function() {
     };
     autocompleteOpts = $.extend(true, defaultAutocompleteOpts, autocompleteOpts);
     $(this.inputField).autocomplete(autocompleteOpts);
-    return $(this.inputField).bind('keydown', this, this.keyDownHandler);
+    return $(this.inputField).bind('keydown', this.keyDownHandler);
   };
 
-  GmapsCompleter.prototype.keyDownHandler = function(event, completer) {
+  GmapsCompleter.prototype.keyDownHandler = function(event) {
     if (event.keyCode === 13) {
-      completer.geocodeLookup('address', $(this.inputField).val(), true);
+      this.geocodeLookup('address', $(this.inputField).val(), true);
       return $(this.inputField).autocomplete("disable");
     } else {
       return $(this.inputField).autocomplete("enable");
