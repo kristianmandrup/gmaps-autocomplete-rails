@@ -137,7 +137,7 @@ The default update UI logic removes the country from the address displayed.
 
 ## autoCompleteInit
 
-The function `autoCompleteInit`, called on an instance of GmapsCompleter, can takes an option hash. Currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes) and `country` can be used.
+The function `autoCompleteInit`, called on an instance of GmapsCompleter, can takes an option hash. Currently only [region](https://developers.google.com/maps/documentation/geocoding/#RegionCodes), `country`  and `autocomplete` can be used.
 
 Example:
 
@@ -148,6 +148,23 @@ autoCompleteInit({region: 'DK', country: 'Denmark'});
 Will make searches in the DK region and remove `', Denmark'` from the result.
 
 Note: Not sure if this is still useful with the new instance based approach!?
+
+Parameter `autocomplete` allows to configure JQuery autocomplete widget
+
+Example:
+```javascript
+autoCompleteInit({
+  region: 'DK', 
+  country: 'Denmark',
+  autocomplete: {
+    minLength: 4,
+    position: {
+      my: "center top",
+      at: "center bottom"
+    }
+  }
+});
+```
 
 ## Assist object
 
