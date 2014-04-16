@@ -34,6 +34,8 @@ Add to javascript manifest file, fx `application.js`
 //= require gmaps-auto-complete
 ```
 
+PS: I have been notified that `//= require gmaps-autocomplete` should work, but I don't see why/how, since the js file is called `gmaps-auto-complete.js`.
+
 Include the google maps script before `application.js`, fx in your layout file:
 
 *application.html.erb*
