@@ -135,14 +135,14 @@ class GmapsCompleter
   # update: should we update the map (center map and position marker)?
   geocodeLookup: ( type, value, update ) ->
     # default value: update = false
-    update ||= false
+    @update ||= false
 
     request = {}
     request[type] = value
 
-    @geocoder.geocode request, performGeocode
+    @geocoder.geocode request, @performGeocode
 
-  performGeocode: (results, status) ->
+  performGeocode: (results, status) =>
     @debug 'performGeocode', status
 
     $(@errorField).html ''
@@ -158,7 +158,7 @@ class GmapsCompleter
       @updateUI results[0].formatted_address, results[0].geometry.location
 
       # Only update the map (position marker and center map) if requested
-      @updateMap(results[0].geometry) if update
+      @updateMap(results[0].geometry) if @update
 
     else
       # Geocoder status ok but no results!?
@@ -195,14 +195,16 @@ class GmapsCompleter
     @debug 'region', @region
 
     self = @
-
-    $(@inputField).autocomplete(
+    
+    autocompleteOpts = opts['autocomplete'] || {}
+    
+    defaultAutocompleteOpts = 
       # event triggered when drop-down option selected
       select: (event,ui) ->
         self.updateUI  ui.item.value, ui.item.geocode.geometry.location
         self.updateMap ui.item.geocode.geometry
-    # source is the list of input options shown in the autocomplete dropdown.
-    # see documentation: http://jqueryui.com/demos/autocomplete/
+      # source is the list of input options shown in the autocomplete dropdown.
+      # see documentation: http://jqueryui.com/demos/autocomplete/
       source: (request,response) ->
         # https://developers.google.com/maps/documentation/geocoding/#RegionCodes
         region_postfix  = ''
@@ -231,15 +233,18 @@ class GmapsCompleter
             )
           )
         )
-    )
+
+    autocompleteOpts = $.extend true, defaultAutocompleteOpts, autocompleteOpts
+
+    $(@inputField).autocomplete(autocompleteOpts)
 
     # triggered when user presses a key in the address box
-    $(self.inputField).bind 'keydown', @, @keyDownHandler
+    $(@inputField).bind 'keydown', @keyDownHandler
     # autocomplete_init
 
-  keyDownHandler: (event, completer) ->
+  keyDownHandler: (event) =>
     if (event.keyCode == 13)
-      completer.geocodeLookup 'address', $(@inputField).val(), true
+      @geocodeLookup 'address', $(@inputField).val(), true
       # ensures dropdown disappears when enter is pressed
       $(@inputField).autocomplete "disable"
     else
