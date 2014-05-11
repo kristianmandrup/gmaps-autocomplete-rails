@@ -34,7 +34,7 @@ Add to javascript manifest file, fx `application.js`
 //= require gmaps-auto-complete
 ```
 
-PS: I have been notified that `//= require gmaps-autocomplete` should work, but I don't see why/how, since the js file is called `gmaps-auto-complete.js`.
+PS: To use the pre 1.3 version (old) use that `//= require gmaps-autocomplete-old`
 
 Include the google maps script before `application.js`, fx in your layout file:
 
@@ -45,7 +45,8 @@ Include the google maps script before `application.js`, fx in your layout file:
 <%= javascript_include_tag "application" %>
 ```
 
-Note also that the autocomplete script depends on jQuery 1.6+.
+Note also that the autocomplete script currently depends on jQuery 1.6+. 
+Please feel free to remove this dependency with a pull request :)
 
 ## Initialize
 
