@@ -10,9 +10,13 @@ I recommend that you also check out: [google maps and RoR](http://stackoverflow.
 
 ## Upgrading
 
-Version 1.3 now comes only with a Class based GmapsCompleter. The old static GmapsCompleter container, used in version 1.2 (and below) has been deprecated. Please upgrade your configuration functionality as demonstrated in the usage/config instructions below.
+Version 1.3+ now comes only with a Class based GmapsCompleter. The old static GmapsCompleter container, used in version 1.2 (and below) has been deprecated. 
+
+Please upgrade your configuration functionality as demonstrated in the usage/config instructions below.
 
 ## Install
+
+## Update gem dependencies
 
 In your project `Gemfile`
 
@@ -22,16 +26,30 @@ gem 'jquery-ui-rails'
 gem 'gmaps-autocomplete-rails'
 ```
 
+Or to always use the most recent version, use `gem 'gmaps-autocomplete-rails', github: "kristianmandrup/gmaps-autocomplete-rails"``
+
 Then run `bundle install`;)
 
 Packed and ready for use with the Asset pipeline :)
 
-Add to javascript manifest file, fx `application.js`
+### Update javascript dependencies
+
+Add to javascript manifest file, fx `app/assets/javascripts/application.js`
 
 ```
 //= require jquery_ujs
-//= require jquery.ui.all
+//= require jquery-ui
 //= require gmaps-auto-complete
+```
+
+Note: Depending on your setup/needs, including jquery-ui is optional (see customization).
+
+### Update style dependencies (optional)
+
+Add to stylesheets manifest file, fx `app/assets/stylesheets/application.css`
+
+```
+*= require jquery-ui
 ```
 
 Include the google maps script before `application.js`, fx in your layout file:
@@ -45,6 +63,33 @@ Include the google maps script before `application.js`, fx in your layout file:
 
 Note also that the autocomplete script currently depends on jQuery 1.6+. 
 Please feel free to remove this dependency with a pull request :)
+
+## Customization
+
+If you want to customize the gem to use another autocomplete "engine" than the default (assumed to be *jquery-ui*), then fork the gem and change the following
+in the `gmaps-auto-complete.coffee` script to suit your needs and compile to js.
+
+```
+# around line 237
+    autocompleteOpts = $.extend true, defaultAutocompleteOpts, autocompleteOpts
+
+    $(@inputField).autocomplete(autocompleteOpts)
+
+    # triggered when user presses a key in the address box
+    $(@inputField).bind 'keydown', @keyDownHandler
+    # autocomplete_init
+
+  keyDownHandler: (event) =>
+    if (event.keyCode == 13)
+      @geocodeLookup 'address', $(@inputField).val(), true
+      # ensures dropdown disappears when enter is pressed
+      $(@inputField).autocomplete "disable"
+    else
+      # re-enable if previously disabled above
+      $(@inputField).autocomplete "enable"
+```
+
+PS: I'm not sure if this is the only place that requires changes...
 
 ## Initialize
 
