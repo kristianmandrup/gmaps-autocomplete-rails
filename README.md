@@ -34,8 +34,6 @@ Add to javascript manifest file, fx `application.js`
 //= require gmaps-auto-complete
 ```
 
-PS: To use the pre 1.3 version (old) use that `//= require gmaps-autocomplete-old`
-
 Include the google maps script before `application.js`, fx in your layout file:
 
 *application.html.erb*

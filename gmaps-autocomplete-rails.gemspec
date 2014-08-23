@@ -5,7 +5,7 @@
 
 Gem::Specification.new do |s|
   s.name = "gmaps-autocomplete-rails"
-  s.version = "0.1.2.1"
+  s.version = "0.1.3"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Kristian Mandrup"]
@@ -29,8 +29,6 @@ Gem::Specification.new do |s|
     "gmaps-autocomplete-rails.gemspec",
     "lib/gmaps-autocomplete-rails.rb",
     "lib/gmaps-autocomplete/view_helper.rb",
-    "spec/index.html",
-    "spec/init.js",
     "spec/jquery-ui/images/ui-bg_flat_0_aaaaaa_40x100.png",
     "spec/jquery-ui/images/ui-bg_glass_55_fbf9ee_1x400.png",
     "spec/jquery-ui/images/ui-bg_glass_65_ffffff_1x400.png",
@@ -49,7 +47,7 @@ Gem::Specification.new do |s|
     "spec/jquery-ui/jquery.ui.1.8.16.ie.css",
     "spec/main.css",
     "spec/spec_helper.rb",
-    "vendor/assets/javascripts/gmaps-autocomplete.js"
+    "vendor/assets/javascripts/gmaps-auto-complete.js"
   ]
   s.homepage = "http://github.com/kristianmandrup/gmaps-autocomplete-rails"
   s.licenses = ["MIT"]
