@@ -2,15 +2,26 @@
 
 Extracted from [gmaps-autocomplete](https://github.com/rjshade/gmaps-autocomplete) and improved markedly and then packaged for use with Rails as an asset gem :)
 
+## Major refactor planned and WIP
+
+Split up the class into these classes:
+
+- Configurator
+- Geocoder
+- Displayer
+- ErrorHandler
+
+Use [LiveScript](http://livescript.net)
+
 ## General info
 
-The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page. 
+The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page.
 
 I recommend that you also check out: [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
 
 ## Upgrading
 
-Version 1.3+ now comes only with a Class based GmapsCompleter. The old static GmapsCompleter container, used in version 1.2 (and below) has been deprecated. 
+Version 1.3+ now comes only with a Class based GmapsCompleter. The old static GmapsCompleter container, used in version 1.2 (and below) has been deprecated.
 
 Please upgrade your configuration functionality as demonstrated in the usage/config instructions below.
 
@@ -61,7 +72,7 @@ Include the google maps script before `application.js`, fx in your layout file:
 <%= javascript_include_tag "application" %>
 ```
 
-Note also that the autocomplete script currently depends on jQuery 1.6+. 
+Note also that the autocomplete script currently depends on jQuery 1.6+.
 Please feel free to remove this dependency with a pull request :)
 
 ## Customization
@@ -132,8 +143,8 @@ The constructor function can take a configuration option hash that can configure
 
 ```javascript
 {
-  mapElem: "#gmaps-canvas", 
-  zoomLevel: 2, 
+  mapElem: "#gmaps-canvas",
+  zoomLevel: 2,
   mapType: google.maps.MapTypeId.ROADMAP,
   pos: [51.751724, -1.255284],
   inputField: '#gmaps-input-address',
@@ -153,7 +164,7 @@ These methods are used to control how the gmaps data is used to update the UI on
 The default logic (taken from GmapsCompleterDefaultAssist) is:
 
 ```coffeescript
-  defaultUpdateMap: (geometry) -> 
+  defaultUpdateMap: (geometry) ->
     map     = @map
     marker  = @marker
 
@@ -200,7 +211,7 @@ Parameter `autocomplete` allows to configure JQuery autocomplete widget
 Example:
 ```javascript
 autoCompleteInit({
-  region: 'DK', 
+  region: 'DK',
   country: 'Denmark',
   autocomplete: {
     minLength: 4,
@@ -225,13 +236,13 @@ The `assist` object can be a class or a simple object containing the following:
     pos: [0, 0]
     inputField: '#gmaps-input-address'
     errorField: '#gmaps-error'
-    debugOn: true  
-  
+    debugOn: true
+
   # update marker and map
   updateMap: (geometry) ->
 
   # fill in the UI elements with new position data
-  updateUI: (address, latLng) ->
+  updateUI: (address, latLng, geocoderResponse) ->
 
   # display current position
   positionOutputter: (latLng) ->
@@ -245,11 +256,11 @@ Example:
 
 ```coffeescript
 class MyCompleterAssist extends GmapsCompleterDefaultAssist
-  updateUI: (address, latLng) ->
+  updateUI: (address, latLng, geocoderResponse) ->
     console.log "Doing my own thang!"
     // ...
-    
-    super (address, latLng)
+
+    super (address, latLng, geocoderResponse)
 ```
 
 Usage (config):
@@ -282,10 +293,12 @@ Some of the prime candidate functions for customization are:
 * updateUi
 * updateMap
 
-Here the default simple `updateUI` implementation:
+Here the default simple `updateUI` implementation which doesn't use ```geocoderResponse```.
+That argument contains the full response from Google. Use it to extract more data
+from the address.
 
 ```javascript
-updateUi: function( address, latLng ) {
+updateUi: function (address, latLng, geocoderResponse) {
   $(this.inputField).autocomplete("close");
   $(this.inputField).val(address);
 
@@ -296,7 +309,7 @@ updateUi: function( address, latLng ) {
 Let's enrich the autocomplete fields with a jobs count for "the area" for each address.
 
 ```javascript
-updateUi: function( address, latLng ) {
+updateUi: function (address, latLng, geocoderResponse) {
   $(this.inputField).autocomplete("close");
 
   var jobsCount = $.ajax(url: 'jobs/search?address=' + address + '&type=count');
@@ -351,7 +364,7 @@ Or,
 And matching configuration in your javascript:
 
 ```javascript
-$(document).ready(function() { 
+$(document).ready(function() {
   var completer;
   completer = new GmapsCompleter({inputField: 'form#search #address', errorField: 'form#search #address_error'});
   completer.autoCompleteInit({region: 'DK'});
@@ -360,7 +373,7 @@ $(document).ready(function() {
 
 ### Tips
 
-To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on whether the page needs it. 
+To avoid loading google maps script on all pages, either use turbolinks or alternatively conditionally load it depending on whether the page needs it.
 For this you could use a simple `Page` model, something like this:
 
 ```ruby
@@ -409,7 +422,7 @@ Enjoy!
 Please help out with suggestions and improvements etc!
 
 ## Contributing to gmaps-autocomplete-rails
- 
+
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.
 * Check out the issue tracker to make sure someone already hasn't requested it and/or contributed it.
 * Fork the project.
@@ -422,4 +435,3 @@ Please help out with suggestions and improvements etc!
 
 Copyright (c) 2012 Kristian Mandrup. See LICENSE.txt for
 further details.
-

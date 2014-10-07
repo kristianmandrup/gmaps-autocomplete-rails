@@ -1,0 +1,39 @@
+<component name="libraryTable">
+  <library name="Generated files" type="javaScript">
+    <properties>
+      <sourceFilesUrls>
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/gmaps-auto-complete.js" />
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/displayer.js" />
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/listeners.js" />
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/error-handler.js" />
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/geocoder.js" />
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/auto-completer.js" />
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/gmaps-completer.js" />
+        <item url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/debugger.js" />
+      </sourceFilesUrls>
+    </properties>
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-completer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/auto-completer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-auto-complete.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/displayer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/geocoder.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/debugger.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-completer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/auto-completer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-auto-complete.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/displayer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/geocoder.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/debugger.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/gmaps-auto-complete.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/displayer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/listeners.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/error-handler.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/geocoder.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/auto-completer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/gmaps-completer.js" />
+      <root url="file://$PROJECT_DIR$/vendor/assets/javascripts/gmaps-autocomplete/debugger.js" />
+    </CLASSES>
+    <SOURCES />
+  </library>
+</component>

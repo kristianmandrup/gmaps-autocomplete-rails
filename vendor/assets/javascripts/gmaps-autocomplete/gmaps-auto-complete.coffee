@@ -1,23 +1,10 @@
 class GmapsCompleter
-  geocoder: null
-  map: null
-  marker: null
-  inputField: null
-  errorField: null
-  positionOutputter: null
-  updateUI: null
-  updateMap: null
-  region: null
-  country: null
-  debugOn: false
-
   # initialise the google maps objects, and add listeners
-  mapElem: null
   zoomLevel: 2
-  mapType: null
   pos: [0, 0]
-  inputField: '#gmaps-input-address'
-  errorField: '#gmaps-error'
+  fields:
+    input: '#gmaps-input-address'
+    error: '#gmaps-error'
 
   constructor: (opts) ->
     @init opts
@@ -262,6 +249,7 @@ class GmapsCompleterDefaultAssist
     errorField: '#gmaps-error'
     debugOn: true
 
+class GmapsUI
   # move the marker to a new position, and center the map on it
   updateMap: (geometry) ->
     map     = @map
@@ -271,13 +259,14 @@ class GmapsCompleterDefaultAssist
     marker.setPosition(geometry.location) if marker    
 
   # fill in the UI elements with new position data
-  updateUI: (address, latLng) ->
+  updateUI: (address, latLng, geocoderResponse) ->
     inputField = @inputField
     country = @country
     
     $(inputField).autocomplete 'close'
 
     @debug 'country', country
+    @debug 'geocoderResponse', geocoderResponse
 
     updateAdr = address.replace ', ' + country, ''
     updateAdr = address
@@ -291,6 +280,8 @@ class GmapsCompleterDefaultAssist
     $('#gmaps-output-latitude').html latLng.lat()
     $('#gmaps-output-longitude').html latLng.lng()  
 
+
+class GmapsErrorHandler
   geocodeErrorMsg: ->
     "Sorry, something went wrong. Try again!"
 
