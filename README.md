@@ -4,7 +4,7 @@ Extracted from [gmaps-autocomplete](https://github.com/rjshade/gmaps-autocomplet
 
 ## General info
 
-The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page. 
+The script is now compiled from Coffeescript and allows you to have multiple fields linked to multiple instances of the `GmapsCompleter` class on the same page.
 
 I recommend that you also check out: [google maps and RoR](http://stackoverflow.com/questions/7466872/google-maps-and-ror-3-1)
 
@@ -248,7 +248,7 @@ class MyCompleterAssist extends GmapsCompleterDefaultAssist
   updateUI: (address, latLng) ->
     console.log "Doing my own thang!"
     // ...
-    
+
     super (address, latLng)
 ```
 
@@ -402,6 +402,13 @@ Alternatively perhaps use RequireJS via the `requirejs-rails` gem, and load it "
 Enjoy!
 
 ## Troubleshooting
+
+`Uncaught ReferenceError: google is not defined`
+
+You must remember to include google maps in your html page before `gmaps-autocomplete` (see *application.html.erb* above).
+
+`<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>`
+
 
 ### Dropdown transparency
 
