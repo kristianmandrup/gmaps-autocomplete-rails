@@ -10,9 +10,13 @@ I recommend that you also check out: [google maps and RoR](http://stackoverflow.
 
 ## Upgrading
 
-Version 1.3+ now comes only with a Class based GmapsCompleter. The old static GmapsCompleter container, used in version 1.2 (and below) has been deprecated. 
+Version 1.3+ now comes only with a class based `GmapsCompleter`. The old static GmapsCompleter container, used in version 1.2 (and below) has been deprecated.
 
 Please upgrade your configuration functionality as demonstrated in the usage/config instructions below.
+
+### Time for a redo!?
+
+In my own humble opinion, this library is in *dire need to be completely redone*. I would love if someone out there was brave enough to refactor (or better redo from scratch!) this library. The time has come.... Thanks ;)
 
 ## Install
 
@@ -57,12 +61,23 @@ Include the google maps script before `application.js`, fx in your layout file:
 *application.html.erb*
 
 ```erb
-<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script async defer type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
 <%= javascript_include_tag "application" %>
 ```
 
 Note also that the autocomplete script currently depends on jQuery 1.6+. 
 Please feel free to remove this dependency with a pull request :)
+
+### Using Google API keys
+
+[Google API keys](https://developers.google.com/maps/documentation/javascript/get-api-key#get-an-api-key)
+
+```js
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap"
+  type="text/javascript"></script>
+```
+
+Note: Google apparently now requires use of the `HTTPS` protocol. This is enforced to ensure that your key (and location?) is not intercepted. Better safe than sorry ;)
 
 ## Customization
 

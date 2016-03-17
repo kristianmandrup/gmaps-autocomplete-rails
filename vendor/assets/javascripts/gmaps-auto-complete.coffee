@@ -32,14 +32,14 @@ class GmapsCompleter
 
     completerAssistClass = opts['assist']
 
-    try       
+    try
       @assist = new completerAssistClass
 
     catch error
       @debug 'assist error', error, opts['assist']
-    
+
     @assist ||= new GmapsCompleterDefaultAssist
-    
+
     @defaultOptions = opts['defaultOptions'] || @assist.options
     opts  = $.extend true, {}, @defaultOptions, opts
 
@@ -95,7 +95,7 @@ class GmapsCompleter
     @debug 'mapElem', @mapElem
 
     return if not @mapElem
-    
+
     # create our map object
     @map = new google.maps.Map @mapElem, mapOptions
 
@@ -195,10 +195,10 @@ class GmapsCompleter
     @debug 'region', @region
 
     self = @
-    
+
     autocompleteOpts = opts['autocomplete'] || {}
-    
-    defaultAutocompleteOpts = 
+
+    defaultAutocompleteOpts =
       # event triggered when drop-down option selected
       select: (event,ui) ->
         self.updateUI  ui.item.value, ui.item.geocode.geometry.location
@@ -268,13 +268,13 @@ class GmapsCompleterDefaultAssist
     marker  = @marker
 
     map.fitBounds(geometry.viewport) if map
-    marker.setPosition(geometry.location) if marker    
+    marker.setPosition(geometry.location) if marker
 
   # fill in the UI elements with new position data
   updateUI: (address, latLng) ->
     inputField = @inputField
     country = @country
-    
+
     $(inputField).autocomplete 'close'
 
     @debug 'country', country
@@ -289,7 +289,7 @@ class GmapsCompleterDefaultAssist
 
   positionOutputter: (latLng) ->
     $('#gmaps-output-latitude').html latLng.lat()
-    $('#gmaps-output-longitude').html latLng.lng()  
+    $('#gmaps-output-longitude').html latLng.lng()
 
   geocodeErrorMsg: ->
     "Sorry, something went wrong. Try again!"
