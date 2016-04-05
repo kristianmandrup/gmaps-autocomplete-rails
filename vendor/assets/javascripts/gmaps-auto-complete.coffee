@@ -63,6 +63,7 @@ class GmapsCompleter
     @mapType  = google.maps.MapTypeId.ROADMAP
 
     zoomLevel = opts['zoomLevel']
+    scrollwheel = opts['scrollwheel']
 
     @inputField = opts['inputField']
     @errorField = opts['#gmaps-error']
@@ -79,6 +80,7 @@ class GmapsCompleter
 
     mapOptions =
       zoom: zoomLevel
+      scrollwheel: scrollwheel
       center: latlng
       mapTypeId: mapType
 
