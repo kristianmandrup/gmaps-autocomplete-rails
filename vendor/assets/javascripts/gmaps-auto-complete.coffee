@@ -217,7 +217,7 @@ class GmapsCompleter
 
         self.debug 'geocode address', address
 
-        geocodeOpts = {'address': address}
+        geocodeOpts = { address: address, componentRestrictions: { country: region || '' } }
 
         # the geocode method takes an address or LatLng to search for
         # and a callback function which should process the results into
