@@ -1,6 +1,10 @@
+## 0.1.5 Aug 2016
+
+- allow limiting a search to a country
+
 ## 0.1.4
 
-- 23. August 2014
+- 23. Aug 2014
 
 Updated for Rails 4+ and fixed some bugs!!
 
