@@ -26,7 +26,6 @@ In your project `Gemfile`
 
 ```ruby
 gem 'jquery-rails'
-gem 'jquery-ui-rails'
 gem 'gmaps-autocomplete-rails'
 ```
 
@@ -42,18 +41,15 @@ Add to javascript manifest file, fx `app/assets/javascripts/application.js`
 
 ```
 //= require jquery_ujs
-//= require jquery-ui
 //= require gmaps-auto-complete
 ```
 
-Note: Depending on your setup/needs, including jquery-ui is optional (see customization).
-
-### Update style dependencies (optional)
+### Update style dependencies
 
 Add to stylesheets manifest file, fx `app/assets/stylesheets/application.css`
 
 ```
-*= require jquery-ui
+*= require gmaps-auto-complete
 ```
 
 Include the google maps script before `application.js`, fx in your layout file:
@@ -63,6 +59,8 @@ Include the google maps script before `application.js`, fx in your layout file:
 ```erb
 <script async defer type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
 <%= javascript_include_tag "application" %>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
 ```
 
 Note also that the autocomplete script currently depends on jQuery 1.6+. 
