@@ -1,0 +1,14 @@
+@import 'jquery-ui-1.8.16.custom.css';
+
+#gmaps-canvas {
+  border: 1px solid #999;
+  -moz-box-shadow:    0px 0px 5px #ccc;
+  -webkit-box-shadow: 0px 0px 5px #ccc;
+  box-shadow:         0px 0px 5px #ccc;
+  height: 400px;
+}
+
+#gmaps-error {
+  color: #cc0000;
+}
+

@@ -1,3 +1,7 @@
+## 0.3.0 Dec 2016
+
+- Made jquery ui styles available via gmaps-autocomplete-rails stylesheet
+
 ## 0.2.0 Aug 2016
 
 - allow limiting a search to a country
