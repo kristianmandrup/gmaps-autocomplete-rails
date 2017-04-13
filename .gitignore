@@ -49,4 +49,6 @@ pkg
 # For rubinius:
 #*.rbc
 
+
+*.gem
 Gemfile.lock
