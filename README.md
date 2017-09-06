@@ -57,7 +57,7 @@ Include the google maps script before `application.js`, fx in your layout file:
 *application.html.erb*
 
 ```erb
-<script async defer type="text/javascript" src="https://maps.googleapis.com/maps/api/js?sensor=false"></script>
+<script async defer type="text/javascript" src="https://maps.googleapis.com/maps/api/js"></script>
 <%= javascript_include_tag "application" %>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js"></script>
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/jquery-ui.min.js"></script>
@@ -403,7 +403,7 @@ Then use page instance to have fine-grained control over how to display the page
 
 ```erb
 <% if @page.map? %>
-  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>
+  <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>
 <% end %>
 <%= javascript_include_tag "application" %>
 ```
@@ -420,7 +420,7 @@ Enjoy!
 
 You must remember to include google maps in your html page before `gmaps-autocomplete` (see *application.html.erb* above).
 
-`<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?sensor=false"></script>`
+`<script type="text/javascript" src="http://maps.googleapis.com/maps/api/js"></script>`
 
 
 ### Dropdown transparency
